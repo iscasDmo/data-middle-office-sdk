@@ -1,0 +1,130 @@
+buildscript {
+    repositories {
+        maven {
+            url "${nexusUrl}"
+            allowInsecureProtocol = true
+        }
+        maven {
+            url "${aliyunUrl}"
+            allowInsecureProtocol = true
+        }
+        maven {
+            url "${aliyunGradlePluginUrl}"
+            allowInsecureProtocol = true
+        }
+        gradlePluginPortal()
+        maven {
+            url "${gradlePluginUrl}"
+            allowInsecureProtocol = true
+        }
+        mavenCentral()
+
+    }
+    dependencies {
+        classpath "com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:${shadowJarVersion}"
+
+
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    //发布至maven中央仓库必须与gitee的子域名一致，所以暂时智能用这个group
+    group = 'cn.ac.iscas'
+    version="${driverVersion}"
+    sourceCompatibility = "${javaVersion}"
+    targetCompatibility = "${javaVersion}"
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        maven {
+            url "${nexusUrl}"
+            allowInsecureProtocol = true
+        }
+        maven {
+            url "${aliyunUrl}"
+            allowInsecureProtocol = true
+        }
+
+        mavenCentral()
+    }
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+    tasks.withType(Javadoc) {
+        options.encoding = "UTF-8"
+    }
+
+    dependencies {
+        //junit
+        testImplementation("junit:junit:${junitVersion}")
+
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "${jupiterVersion}"
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "${jupiterVersion}"
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "${jupiterVersion}"
+        testImplementation group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "${jupiterVersion}"
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-launcher', version: "${junitPlatformVersion}"
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: "${junitPlatformVersion}"
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: "${junitPlatformVersion}"
+
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    tasks.withType(JavaExec) {
+    }
+    //这里一定得要。在多模块下，不然编译失败，因为不会把依赖模块给打包。
+    jar {
+        enabled = true
+        archiveClassifier = '' //jar包名禁止生成plain
+    }
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allJava
+        archiveClassifier = 'sources'
+    }
+    task javadocJar(type: Jar) {
+        from javadoc
+        archiveClassifier = 'javadoc'
+    }
+    sourceSets.main.resources.srcDirs = ["src/main/java", "src/main/resources"]
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId project.group
+                artifactId project.name
+                version project.version
+                //若是war包，就写components.web,若是jar包，就写components.java
+                from components.java
+//                artifact shadowJar
+                artifact sourcesJar
+            }
+        }
+        repositories {
+            maven {
+                allowInsecureProtocol = true
+                if (project.version.endsWith('-SNAPSHOT')) {
+                    url = "http://172.16.10.190:8181/repository/maven-snapshots/"
+                } else {
+                    url = "http://172.16.10.190:8181/repository/maven-releases/"
+                }
+
+                credentials {
+                    username 'admin'
+                    password 'admin123'
+                }
+            }
+        }
+    }
+
+}
