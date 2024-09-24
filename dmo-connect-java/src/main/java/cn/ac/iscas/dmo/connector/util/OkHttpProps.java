@@ -11,19 +11,19 @@ public class OkHttpProps {
      * 读取超时时间毫秒
      */
 
-    private int readTimeout = 10000;
+    private int readTimeout = 50000;
 
     /**
      * 写数据超时时间毫秒
      */
 
-    private int writeTimeout = 10000;
+    private int writeTimeout = 50000;
 
     /**
      * 连接超时时间毫秒
      */
 
-    private int connectTimeout = 10000;
+    private int connectTimeout = 30000;
 
     /**
      * 最大空闲数目

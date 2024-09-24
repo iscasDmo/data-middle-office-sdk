@@ -84,7 +84,7 @@ class ConnectionImplTest {
     }
 
     /**
-     *
+     * 测试修改
      */
     @Test
     public void testUpdate() throws SQLException {
@@ -92,6 +92,19 @@ class ConnectionImplTest {
         System.out.println(statement);
         int count = statement.executeUpdate("update dict_data set update_by = 'zs' where id = 1");
         System.out.println(count);
+    }
+
+    /**
+     * 测试preparedstatement
+     */
+    @Test
+    public void testPreparedStatement() throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement("select * from dict_data where dict_type = ?");
+        preparedStatement.setString(1, "系统类");
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()) {
+            System.out.println(resultSet.getString("dict_type"));
+        }
     }
 
 }

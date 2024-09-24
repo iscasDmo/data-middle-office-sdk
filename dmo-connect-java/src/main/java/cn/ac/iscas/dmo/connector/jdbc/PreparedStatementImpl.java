@@ -91,7 +91,11 @@ public class PreparedStatementImpl extends StatementImpl implements PreparedStat
 
     @Override
     public void setString(int parameterIndex, String x) throws SQLException {
-        sqlData[parameterIndex - 1] = String.valueOf(x);
+        if (x == null) {
+            sqlData[parameterIndex - 1] = "null";
+        } else {
+            sqlData[parameterIndex - 1] = "'" + x + "'";
+        }
     }
 
     @Override
