@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static net.sf.jsqlparser.parser.feature.Feature.values;
+
 /**
  * 查询处理器
  *
@@ -29,7 +31,19 @@ public class ExecuteQuery {
         ConnectionImpl connection = (ConnectionImpl) rs.getStatement().getConnection();
         Map<String, Object> map = doExecute(connection, sql);
         if (map.containsKey("value")) {
-            List<Map<String, Object>> values = (List<Map<String, Object>>) map.get("value");
+            Map<String, Object> mapValue = (Map<String, Object>) map.get("value");
+            List<Map<String, Object>> values = null;
+            if (mapValue != null) {
+                values = (List<Map<String, Object>>) mapValue.get("data");
+                List<String> metas = (List<String>) mapValue.get("metas");
+                if (metas != null) {
+                    Map<Integer, String> headerMapping = new HashMap<>(16);
+                    for (int i = 0; i < metas.size(); i++) {
+                        headerMapping.put(i, metas.get(i));
+                    }
+                    rs.setHeaderMapping(headerMapping);
+                }
+            }
             rs.setCacheData(values);
         }
     }

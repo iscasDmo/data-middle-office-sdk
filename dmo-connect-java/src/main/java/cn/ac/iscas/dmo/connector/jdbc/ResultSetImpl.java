@@ -1404,4 +1404,11 @@ public class ResultSetImpl implements ResultSet {
     public void setCacheData(List<Map<String, Object>> cacheData) {
         this.cacheData = cacheData;
     }
+
+    public void setHeaderMapping(Map<Integer, String> headerMapping) {
+        this.headerMapping = headerMapping;
+        if (headerMapping != null) {
+            headerMapping.forEach((k, v) -> headerMapping2.computeIfAbsent(v, key -> new ArrayList<>()).add(k));
+        }
+    }
 }
