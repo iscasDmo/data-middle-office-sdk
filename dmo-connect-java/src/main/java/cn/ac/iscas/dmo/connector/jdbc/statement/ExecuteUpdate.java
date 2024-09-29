@@ -4,6 +4,8 @@ import cn.ac.iscas.dmo.connector.jdbc.ConnectionImpl;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,9 +21,12 @@ public class ExecuteUpdate {
     public static int execute(ConnectionImpl connection, String sql) throws SQLException, IOException {
         Map<String, Object> map = ExecuteQuery.doExecute(connection, sql);
         if (map.containsKey("value")) {
-            Object o = map.get("value");
-            if (o instanceof Integer) {
-                return (int) o;
+            Map<String, Object> mapValue = (Map<String, Object>) map.get("value");
+            if (mapValue != null) {
+                Object o1 = mapValue.get("data");
+                if (o1 instanceof Integer) {
+                    return (int) o1;
+                }
             }
         }
         return 0;

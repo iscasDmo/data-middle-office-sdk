@@ -9,9 +9,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author zhuquanwen
@@ -122,7 +120,9 @@ public class StatementImpl implements DmoStatement {
     public boolean execute(String sql) throws SQLException {
         checkClosed();
         try {
-            net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sql);
+            // 不知道什么原因，出现full时解析就会出错，这里暂时做一下处理，todo
+            String checkSql = sql.replace("full,", "full1,");
+            net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(checkSql);
             if (statement instanceof Select) {
                 rs = executeQuery(sql);
                 return true;

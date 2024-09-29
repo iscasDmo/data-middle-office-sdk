@@ -5,15 +5,15 @@ import cn.ac.iscas.dmo.connector.jdbc.ConnectionImpl;
 import cn.ac.iscas.dmo.connector.jdbc.ResultSetImpl;
 import cn.ac.iscas.dmo.connector.util.JsonUtils;
 import cn.ac.iscas.dmo.connector.util.OkHttpCustomClient;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static net.sf.jsqlparser.parser.feature.Feature.values;
 
@@ -34,14 +34,23 @@ public class ExecuteQuery {
             Map<String, Object> mapValue = (Map<String, Object>) map.get("value");
             List<Map<String, Object>> values = null;
             if (mapValue != null) {
-                values = (List<Map<String, Object>>) mapValue.get("data");
-                List<String> metas = (List<String>) mapValue.get("metas");
+                Object o = mapValue.get("data");
+                if (o instanceof Integer) {
+                    Map<String, Object> map2 = new HashMap<>();
+                    map2.put(String.valueOf(o), o);
+                    values = new ArrayList<>();
+                    values.add(map2);
+                } else {
+                    values = (List<Map<String, Object>>) o;
+                }
+                List<Map<String, Object>> metas = (List<Map<String, Object>>) mapValue.get("metas");
                 if (metas != null) {
                     Map<Integer, String> headerMapping = new HashMap<>(16);
                     for (int i = 0; i < metas.size(); i++) {
-                        headerMapping.put(i, metas.get(i));
+                        headerMapping.put(i, (String) metas.get(i).get("columnName"));
                     }
                     rs.setHeaderMapping(headerMapping);
+                    rs.setMetas(metas);
                 }
             }
             rs.setCacheData(values);
@@ -64,14 +73,16 @@ public class ExecuteQuery {
         }
         sqlServiceUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + sqlServiceUrl;
 
+        sql = sql.replace("\n", " ").replace("\t", " ");
+        sql = URLEncoder.encode(sql, "UTF-8");
         Response response = httpClient.doPostWithRes(sqlServiceUrl + "?sql=" + sql, header, new HashMap<>());
         int code = response.code();
         if (code != 200) {
-            throw new RuntimeException("查询出错:" + response.body().string());
+            throw new SQLException("查询出错:" + response.body().string());
         }
-        String string = response.body().string();
-        Map<String, Object> map = JsonUtils.fromJson(string, new TypeReference<Map<String, Object>>() {
-        });
+//        String string = response.body().string();
+//        Map<String, Object> map = (Map<String, Object>) JSON.parse(string);
+        Map<String, Object> map = JsonUtils.fromJson(response.body().bytes(), Map.class);
         return map;
     }
 }

@@ -98,6 +98,11 @@ public class OkHttpCustomClient {
         return call.execute().body();
     }
 
+    public Response doGetWithRes(String url, Map<String, String> headerMap) throws IOException {
+        Call call = baseGetCall(url, headerMap);
+        return call.execute();
+    }
+
     /**
      * 同步GET请求
      *

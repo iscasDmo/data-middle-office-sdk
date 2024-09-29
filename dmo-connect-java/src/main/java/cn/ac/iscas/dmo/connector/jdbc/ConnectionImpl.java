@@ -3,10 +3,15 @@ package cn.ac.iscas.dmo.connector.jdbc;
 import cn.ac.iscas.dmo.connector.Constants;
 import cn.ac.iscas.dmo.connector.conf.HostInfo;
 import cn.ac.iscas.dmo.connector.util.Base64Utils;
+import cn.ac.iscas.dmo.connector.util.JsonUtils;
 import cn.ac.iscas.dmo.connector.util.OkHttpCustomClient;
 import cn.ac.iscas.dmo.connector.util.OkHttpProps;
+import com.fasterxml.jackson.core.type.TypeReference;
+import okhttp3.Response;
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -29,6 +34,8 @@ public class ConnectionImpl implements Connection, Constants {
 
     private String useSsl;
 
+    private String dbType;
+
     private OkHttpCustomClient httpClient;
 
     private boolean closed;
@@ -46,6 +53,38 @@ public class ConnectionImpl implements Connection, Constants {
         createDmoUrl(hostInfo);
         // 初始化okhttp
         initOkHttp(hostInfo);
+        // 获取dbType
+        this.dbType = initDbType();
+    }
+
+    private String initDbType() throws SQLException {
+
+        String protocol = "https://";
+        if ("false".equals(useSsl)) {
+            protocol = "http://";
+        }
+
+        String getDbTypeUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + "/dmo/data-service/dbType?url=" + sqlServiceUrl;
+
+        Response response = null;
+        try {
+            response = httpClient.doGetWithRes(getDbTypeUrl, new HashMap<>());
+        } catch (IOException e) {
+            throw new SQLException("获取数据源类型出错", e);
+        }
+        int code = response.code();
+        String resStr;
+        try {
+            resStr = response.body().string();
+        } catch (IOException e) {
+            throw new SQLException(e.getMessage(), e);
+        }
+        if (code != 200) {
+            throw new SQLException("获取数据源类型出错:" + resStr);
+        }
+        Map<String, Object> map = JsonUtils.fromJson(resStr, new TypeReference<Map<String, Object>>() {
+        });
+        return (String) map.get("value");
     }
 
     public static ConnectionImpl getInstance(HostInfo hostInfo) throws SQLException {
@@ -81,12 +120,15 @@ public class ConnectionImpl implements Connection, Constants {
 
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        throw new UnsupportedOperationException("暂不支持方法prepareCall");
+        return this.prepareCall(sql, DEFAULT_RESULT_SET_TYPE, DEFAULT_RESULT_SET_CONCURRENCY);
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        throw new UnsupportedOperationException("暂不支持方法prepareCall");
+        CallableStatementImpl statement = new CallableStatementImpl(this, sql);
+        statement.setResultSetType(resultSetType);
+        statement.setResultSetConcurrency(resultSetConcurrency);
+        return statement;
     }
 
 
@@ -126,7 +168,7 @@ public class ConnectionImpl implements Connection, Constants {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        return null;
+        return new DatabaseMetaDataImpl(this);
     }
 
     @Override
@@ -418,4 +460,11 @@ public class ConnectionImpl implements Connection, Constants {
         return origHostInfo;
     }
 
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
+    }
+
+    public String getDbType() {
+        return dbType;
+    }
 }

@@ -3,10 +3,9 @@ package cn.ac.iscas.dmo.connector.jdbc;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 /**
  * @author zhuquanwen
@@ -18,15 +17,17 @@ import java.util.Objects;
 public class ResultSetMetaDataImpl implements ResultSetMetaData {
     private final List<ColumnMetaData> columns = new ArrayList<>();
 
-    public ResultSetMetaDataImpl(List<String> headers) {
-        for (String column : headers) {
-            ColumnMetaData columnMetaData = new ColumnMetaData();
-            columnMetaData.setColumnLabel(column);
-            columnMetaData.setColumnName(column);
-            if (Objects.equals("_id", column)) {
-                columnMetaData.setColumnType(Types.VARCHAR);
+    public ResultSetMetaDataImpl(List<Map<String, Object>> metas) {
+        if (metas != null && !metas.isEmpty()) {
+            for (Map<String, Object> meta : metas) {
+                String columnName = (String) meta.get("columnName");
+                Object typeObj =  meta.get("columnType");
+                ColumnMetaData columnMetaData = new ColumnMetaData();
+                columnMetaData.setColumnLabel(columnName);
+                columnMetaData.setColumnName(columnName);
+                columnMetaData.setColumnType(typeObj == null ? 0 : Integer.parseInt(typeObj.toString()));
+                this.columns.add(columnMetaData);
             }
-            this.columns.add(columnMetaData);
         }
     }
 

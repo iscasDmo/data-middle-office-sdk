@@ -48,6 +48,11 @@ public class ResultSetImpl implements ResultSet {
     private Map<Integer, String> headerMapping = new HashMap<>();
 
     /**
+     * 元数据
+     */
+    private List<Map<String, Object>> metas;
+
+    /**
      * 返回数据的currentData中key与顺序索引的映射关系，与headerMapping相反，暂不考虑同一个key对应多个顺序索引的问题
      */
     private final Map<String, List<Integer>> headerMapping2 = new HashMap<>();
@@ -186,7 +191,7 @@ public class ResultSetImpl implements ResultSet {
     public String getString(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
-        return (String) lastData;
+        return lastData == null ? null : String.valueOf(lastData);
     }
 
     @Override
@@ -217,8 +222,10 @@ public class ResultSetImpl implements ResultSet {
     public int getInt(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
-        Integer integer = (Integer) lastData;
-        return integer == null ? 0 : integer;
+        if (lastData instanceof Integer) {
+            return ((Integer) lastData).intValue();
+        }
+        return lastData == null ? 0 : Integer.parseInt(lastData.toString());
     }
 
     @Override
@@ -402,10 +409,10 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        List<Integer> indexes = new ArrayList<>(headerMapping.keySet());
-        indexes.sort(Integer::compareTo);
-        List<String> headers = indexes.stream().map(index -> headerMapping.get(index)).collect(Collectors.toList());
-        return new ResultSetMetaDataImpl(headers);
+//        List<Integer> indexes = new ArrayList<>(headerMapping.keySet());
+//        indexes.sort(Integer::compareTo);
+//        List<String> headers = indexes.stream().map(index -> headerMapping.get(index)).collect(Collectors.toList());
+        return new ResultSetMetaDataImpl(metas);
     }
 
     @Override
@@ -1410,5 +1417,9 @@ public class ResultSetImpl implements ResultSet {
         if (headerMapping != null) {
             headerMapping.forEach((k, v) -> headerMapping2.computeIfAbsent(v, key -> new ArrayList<>()).add(k));
         }
+    }
+
+    public void setMetas(List<Map<String, Object>> metas) {
+        this.metas = metas;
     }
 }
