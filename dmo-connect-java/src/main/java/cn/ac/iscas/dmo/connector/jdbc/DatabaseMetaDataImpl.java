@@ -32,7 +32,7 @@ public class DatabaseMetaDataImpl implements DatabaseMetaData {
 
     @Override
     public String getURL() throws SQLException {
-        return "";
+        return connection.getOrigHostInfo().getUrl();
     }
 
     @Override

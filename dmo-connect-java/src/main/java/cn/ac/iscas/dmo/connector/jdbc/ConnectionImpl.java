@@ -2,6 +2,7 @@ package cn.ac.iscas.dmo.connector.jdbc;
 
 import cn.ac.iscas.dmo.connector.Constants;
 import cn.ac.iscas.dmo.connector.conf.HostInfo;
+import cn.ac.iscas.dmo.connector.util.Base64Utils;
 import cn.ac.iscas.dmo.connector.util.OkHttpCustomClient;
 import cn.ac.iscas.dmo.connector.util.OkHttpProps;
 import cn.ac.iscas.dmo.db.rpc.GrpcUtils;
@@ -24,13 +25,7 @@ import java.util.concurrent.Executor;
 public class ConnectionImpl implements Connection, Constants {
     private final HostInfo origHostInfo;
 
-//    private String sqlServiceUrl;
-
     private String token;
-
-//    private String useSsl;
-
-//    private String dbType;
 
     private String datasourceType;
 
@@ -418,10 +413,19 @@ public class ConnectionImpl implements Connection, Constants {
 //        useSsl = hostInfo.getUseSsl();
 //    }
 
-    private void createDmoInfo(HostInfo hostInfo) {
+    private void createDmoInfo(HostInfo hostInfo) throws SQLException {
         token = hostInfo.getToken();
-        datasourceType = hostInfo.getDatasourceType();
-        datasourceName = hostInfo.getDatasourceName();
+
+        String tmpDsType = hostInfo.getDatasourceType();
+        if (tmpDsType == null) {
+            throw new SQLException("连接URL中datasourceType为空");
+        }
+        datasourceType = Base64Utils.decodeToStr(tmpDsType);
+        String tmpDsName = hostInfo.getDatasourceName();
+        if (tmpDsName == null) {
+            throw new SQLException("连接URL中datasourceName为空");
+        }
+        datasourceName =  Base64Utils.decodeToStr(tmpDsName);
     }
 
     private void initOkHttp(HostInfo hostInfo) {

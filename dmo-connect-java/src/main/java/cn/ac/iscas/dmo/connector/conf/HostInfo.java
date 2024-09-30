@@ -18,15 +18,15 @@ public class HostInfo {
 
     private final String host;
     private final int port;
-    //    private final String sqlServiceUrl;
     private final String token;
     private final Map<String, String> hostProperties = new HashMap<>();
-    //    private final String useSsl;
     private final String datasourceType;
     private final String datasourceName;
+    private final String url;
 
-    public HostInfo(String host, int port, String datasourceType, String datasourceName,
+    public HostInfo(String url, String host, int port, String datasourceType, String datasourceName,
                     String token, Properties properties) {
+        this.url = url;
         this.host = host;
         this.port = port;
         this.datasourceType = datasourceType;
@@ -41,6 +41,7 @@ public class HostInfo {
 
     public static HostInfo getInstance(String url, Properties info) {
         String props = null;
+        String oriUrl = url;
         if (url.contains("?")) {
             String tmpUrl = url;
             url = tmpUrl.substring(0, tmpUrl.indexOf("?"));
@@ -64,52 +65,8 @@ public class HostInfo {
         String[] strs = url.split(":");
         String host = strs[2].substring(strs[2].indexOf("//") + 2);
         int port = Integer.parseInt(strs[3].split("/")[0]);
-        return new HostInfo(host, port, datasourceType, datasourceName, token, info);
+        return new HostInfo(oriUrl, host, port, datasourceType, datasourceName, token, info);
     }
-
-
-//    public HostInfo(String host, int port, String sqlServiceUrl, String token, String useSsl, Properties properties) {
-//        this.host = host;
-//        this.port = port;
-//        this.sqlServiceUrl = sqlServiceUrl;
-//        this.token = token;
-//        this.useSsl = useSsl;
-//        if (Objects.nonNull(properties)) {
-//            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-//                this.hostProperties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
-//            }
-//        }
-//    }
-//
-//    public static HostInfo getInstance(String url, Properties info) {
-//        String props = null;
-//        if (url.contains("?")) {
-//            String tmpUrl = url;
-//            url = tmpUrl.substring(0, tmpUrl.indexOf("?"));
-//            props = tmpUrl.substring(tmpUrl.indexOf("?") + 1);
-//        }
-//        if (Objects.nonNull(props)) {
-//            String[] splits = props.split("&");
-//            for (String split : splits) {
-//                if (Objects.nonNull(split) && !split.isEmpty()) {
-//                    if (split.contains("=")) {
-//                        String key = split.substring(0, split.indexOf("="));
-//                        String value = split.substring(split.indexOf("=") + 1);
-//                        info.put(key, value);
-//                    }
-//                }
-//            }
-//        }
-//        String sqlServiceUrl = (String) info.get("sqlServiceUrl");
-//        String token = (String) info.get("Authorization");
-//        String useSsl = (String) info.get("useSsl");
-//        useSsl = Objects.isNull(useSsl) ? "false" : useSsl;
-//        String[] strs = url.split(":");
-//        String host = strs[2].substring(strs[2].indexOf("//") + 2);
-//        int port = Integer.parseInt(strs[3].split("/")[0]);
-//        return new HostInfo(host, port, sqlServiceUrl, token, useSsl, info);
-//    }
-
 
     public String getHost() {
         return host;
@@ -119,9 +76,6 @@ public class HostInfo {
         return port;
     }
 
-//    public String getSqlServiceUrl() {
-//        return sqlServiceUrl;
-//    }
 
     public String getToken() {
         return token;
@@ -131,16 +85,15 @@ public class HostInfo {
         return hostProperties;
     }
 
-//    public String getUseSsl() {
-//        return useSsl;
-//    }
-
-
     public String getDatasourceType() {
         return datasourceType;
     }
 
     public String getDatasourceName() {
         return datasourceName;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

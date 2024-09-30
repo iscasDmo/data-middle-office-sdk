@@ -199,6 +199,10 @@ public class ResultSetImpl implements ResultSet {
     public boolean getBoolean(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
+        if (lastData instanceof BigDecimal) {
+            BigDecimal bigDecimal = (BigDecimal) lastData;
+            return 1 == bigDecimal.intValue();
+        }
         Boolean bool = (Boolean) lastData;
         return bool != null && bool;
     }
