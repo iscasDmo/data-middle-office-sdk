@@ -1,13 +1,14 @@
 package cn.ac.iscas.dmo.connector.jdbc;
 
+import cn.ac.iscas.dmo.connector.support.DmoClob;
 import cn.ac.iscas.dmo.connector.util.DateSafeUtils;
 import cn.ac.iscas.dmo.connector.util.LocalDateTimeUtils;
 
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.sql.Date;
 import java.text.ParseException;
@@ -65,7 +66,7 @@ public class ResultSetImpl implements ResultSet {
     /**
      * 每次拉取数据的大小，默认1000
      */
-    private int fetchSize = 1000;
+    private int fetchSize = 10;
 
     /**
      * 影响行数
@@ -454,7 +455,7 @@ public class ResultSetImpl implements ResultSet {
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
-        return new BigDecimal(lastData.toString());
+        return lastData == null ? null : new BigDecimal(lastData.toString());
     }
 
     @Override
@@ -841,7 +842,9 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public Clob getClob(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("暂时不支持方法：getClob");
+        String str = getString(columnLabel);
+        return new DmoClob(str);
+//        throw new UnsupportedOperationException("暂时不支持方法：getClob");
     }
 
     @Override

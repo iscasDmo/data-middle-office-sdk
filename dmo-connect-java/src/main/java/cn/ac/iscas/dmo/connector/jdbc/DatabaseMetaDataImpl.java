@@ -68,7 +68,7 @@ public class DatabaseMetaDataImpl implements DatabaseMetaData {
     @Override
     public String getDatabaseProductName() throws SQLException {
         String result = "MySQL";
-        String dbType = connection.getDbType();
+        String dbType = connection.getDatasourceType();
         if (Objects.nonNull(dbType)) {
             if (dbType.startsWith("mysql")) {
                 result = "MySQL";
@@ -637,8 +637,7 @@ public class DatabaseMetaDataImpl implements DatabaseMetaData {
         ResultSetImpl rs = new ResultSetImpl(null);
         String sql = "SELECT * FROM " + tableNamePattern + " WHERE 1 <> 1";
         try {
-            Map<String, Object> stringObjectMap = ExecuteQuery.doExecute(connection, sql);
-            Map<String, Object> valueMap = (Map<String, Object>) stringObjectMap.get("value");
+            Map<String, Object> valueMap = ExecuteQuery.doExecute(connection, sql);
             if (valueMap != null) {
                 List<Map<String, Object>> metas = (List<Map<String, Object>>) valueMap.get("metas");
                 if (metas != null) {
@@ -675,8 +674,7 @@ public class DatabaseMetaDataImpl implements DatabaseMetaData {
         ResultSetImpl resultSet = new ResultSetImpl(null);
         String sql = "SELECT * FROM " + tableNamePattern + " WHERE 1 <> 1 ";
         try {
-            Map<String, Object> stringObjectMap = ExecuteQuery.doExecute(connection, sql);
-            Map<String, Object> valueMap = (Map<String, Object>) stringObjectMap.get("value");
+            Map<String, Object> valueMap = ExecuteQuery.doExecute(connection, sql);
             if (valueMap != null) {
                 List<Map<String, Object>> metas = (List<Map<String, Object>>) valueMap.get("metas");
                 if (metas != null) {

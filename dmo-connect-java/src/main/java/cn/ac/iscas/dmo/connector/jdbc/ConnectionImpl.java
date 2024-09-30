@@ -2,16 +2,12 @@ package cn.ac.iscas.dmo.connector.jdbc;
 
 import cn.ac.iscas.dmo.connector.Constants;
 import cn.ac.iscas.dmo.connector.conf.HostInfo;
-import cn.ac.iscas.dmo.connector.util.Base64Utils;
-import cn.ac.iscas.dmo.connector.util.JsonUtils;
 import cn.ac.iscas.dmo.connector.util.OkHttpCustomClient;
 import cn.ac.iscas.dmo.connector.util.OkHttpProps;
-import com.fasterxml.jackson.core.type.TypeReference;
-import okhttp3.Response;
+import cn.ac.iscas.dmo.db.rpc.GrpcUtils;
+import cn.ac.iscas.dmo.db.rpc.execute.StreamServiceGrpc;
 
-import java.io.IOException;
 import java.sql.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -28,17 +24,23 @@ import java.util.concurrent.Executor;
 public class ConnectionImpl implements Connection, Constants {
     private final HostInfo origHostInfo;
 
-    private String sqlServiceUrl;
+//    private String sqlServiceUrl;
 
     private String token;
 
-    private String useSsl;
+//    private String useSsl;
 
-    private String dbType;
+//    private String dbType;
+
+    private String datasourceType;
+
+    private String datasourceName;
 
     private OkHttpCustomClient httpClient;
 
     private boolean closed;
+
+    private StreamServiceGrpc.StreamServiceBlockingStub stub;
 
     /**
      * 默认结果集类型
@@ -50,42 +52,79 @@ public class ConnectionImpl implements Connection, Constants {
     public ConnectionImpl(HostInfo hostInfo) throws SQLException {
         this.origHostInfo = hostInfo;
         // 获取中台的一些信息
-        createDmoUrl(hostInfo);
+//        createDmoUrl(hostInfo);
+        createDmoInfo(hostInfo);
+        // 初始化grpc
+        initGrpc();
         // 初始化okhttp
-        initOkHttp(hostInfo);
+//        initOkHttp(hostInfo);
         // 获取dbType
-        this.dbType = initDbType();
+//        this.dbType = initDbType();
     }
 
-    private String initDbType() throws SQLException {
-
-        String protocol = "https://";
-        if ("false".equals(useSsl)) {
-            protocol = "http://";
-        }
-
-        String getDbTypeUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + "/dmo/data-service/dbType?url=" + sqlServiceUrl;
-
-        Response response = null;
-        try {
-            response = httpClient.doGetWithRes(getDbTypeUrl, new HashMap<>());
-        } catch (IOException e) {
-            throw new SQLException("获取数据源类型出错", e);
-        }
-        int code = response.code();
-        String resStr;
-        try {
-            resStr = response.body().string();
-        } catch (IOException e) {
-            throw new SQLException(e.getMessage(), e);
-        }
-        if (code != 200) {
-            throw new SQLException("获取数据源类型出错:" + resStr);
-        }
-        Map<String, Object> map = JsonUtils.fromJson(resStr, new TypeReference<Map<String, Object>>() {
-        });
-        return (String) map.get("value");
+    private void initGrpc() {
+        stub = GrpcUtils.getStub(origHostInfo.getHost(), origHostInfo.getPort());
     }
+
+//    private String initDbType() throws SQLException {
+//
+//        String protocol = "https://";
+//        if ("false".equals(useSsl)) {
+//            protocol = "http://";
+//        }
+//
+//        String getDbTypeUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + "/dmo/data-service/dbType?url=" + sqlServiceUrl;
+//
+//        Response response = null;
+//        try {
+//            response = httpClient.doGetWithRes(getDbTypeUrl, new HashMap<>());
+//        } catch (IOException e) {
+//            throw new SQLException("获取数据源类型出错", e);
+//        }
+//        int code = response.code();
+//        String resStr;
+//        try {
+//            resStr = response.body().string();
+//        } catch (IOException e) {
+//            throw new SQLException(e.getMessage(), e);
+//        }
+//        if (code != 200) {
+//            throw new SQLException("获取数据源类型出错:" + resStr);
+//        }
+//        Map<String, Object> map = JsonUtils.fromJson(resStr, new TypeReference<Map<String, Object>>() {
+//        });
+//        return (String) map.get("value");
+//    }
+
+//    private String initDbType() throws SQLException {
+//
+//        String protocol = "https://";
+//        if ("false".equals(useSsl)) {
+//            protocol = "http://";
+//        }
+//
+//        String getDbTypeUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + "/dmo/data-service/dbType?url=" + sqlServiceUrl;
+//
+//        Response response = null;
+//        try {
+//            response = httpClient.doGetWithRes(getDbTypeUrl, new HashMap<>());
+//        } catch (IOException e) {
+//            throw new SQLException("获取数据源类型出错", e);
+//        }
+//        int code = response.code();
+//        String resStr;
+//        try {
+//            resStr = response.body().string();
+//        } catch (IOException e) {
+//            throw new SQLException(e.getMessage(), e);
+//        }
+//        if (code != 200) {
+//            throw new SQLException("获取数据源类型出错:" + resStr);
+//        }
+//        Map<String, Object> map = JsonUtils.fromJson(resStr, new TypeReference<Map<String, Object>>() {
+//        });
+//        return (String) map.get("value");
+//    }
 
     public static ConnectionImpl getInstance(HostInfo hostInfo) throws SQLException {
         // 获取链接实例
@@ -371,12 +410,18 @@ public class ConnectionImpl implements Connection, Constants {
         return false;
     }
 
-    private void createDmoUrl(HostInfo hostInfo) {
-        token = hostInfo.getToken();
-        String url = hostInfo.getSqlServiceUrl();
-        sqlServiceUrl = Base64Utils.decodeToStr(url);
+//    private void createDmoUrl(HostInfo hostInfo) {
+//        token = hostInfo.getToken();
+//        String url = hostInfo.getSqlServiceUrl();
+//        sqlServiceUrl = Base64Utils.decodeToStr(url);
+//
+//        useSsl = hostInfo.getUseSsl();
+//    }
 
-        useSsl = hostInfo.getUseSsl();
+    private void createDmoInfo(HostInfo hostInfo) {
+        token = hostInfo.getToken();
+        datasourceType = hostInfo.getDatasourceType();
+        datasourceName = hostInfo.getDatasourceName();
     }
 
     private void initOkHttp(HostInfo hostInfo) {
@@ -424,13 +469,13 @@ public class ConnectionImpl implements Connection, Constants {
         }
     }
 
-    public String getSqlServiceUrl() {
-        return sqlServiceUrl;
-    }
-
-    public void setSqlServiceUrl(String sqlServiceUrl) {
-        this.sqlServiceUrl = sqlServiceUrl;
-    }
+//    public String getSqlServiceUrl() {
+//        return sqlServiceUrl;
+//    }
+//
+//    public void setSqlServiceUrl(String sqlServiceUrl) {
+//        this.sqlServiceUrl = sqlServiceUrl;
+//    }
 
     public String getToken() {
         return token;
@@ -448,23 +493,45 @@ public class ConnectionImpl implements Connection, Constants {
         this.httpClient = httpClient;
     }
 
-    public String getUseSsl() {
-        return useSsl;
-    }
-
-    public void setUseSsl(String useSsl) {
-        this.useSsl = useSsl;
-    }
+//    public String getUseSsl() {
+//        return useSsl;
+//    }
+//
+//    public void setUseSsl(String useSsl) {
+//        this.useSsl = useSsl;
+//    }
 
     public HostInfo getOrigHostInfo() {
         return origHostInfo;
     }
 
-    public void setDbType(String dbType) {
-        this.dbType = dbType;
+//    public void setDbType(String dbType) {
+//        this.dbType = dbType;
+//    }
+//
+//    public String getDbType() {
+//        return dbType;
+//    }
+
+    public String getDatasourceName() {
+        return datasourceName;
     }
 
-    public String getDbType() {
-        return dbType;
+    public void setDatasourceName(String datasourceName) {
+        this.datasourceName = datasourceName;
     }
+
+    public String getDatasourceType() {
+        return datasourceType;
+    }
+
+    public void setDatasourceType(String datasourceType) {
+        this.datasourceType = datasourceType;
+    }
+
+
+    public StreamServiceGrpc.StreamServiceBlockingStub getStub() {
+        return stub;
+    }
+
 }

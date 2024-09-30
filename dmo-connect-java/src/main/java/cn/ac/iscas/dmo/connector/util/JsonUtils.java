@@ -124,7 +124,7 @@ public class JsonUtils {
     }
 
     @SuppressWarnings("deprecation")
-    private static ObjectMapper getMapper() {
+    public static ObjectMapper getMapper() {
         if (!Objects.isNull(OBJECT_MAPPER_THREAD_LOCAL.get())) {
             return OBJECT_MAPPER_THREAD_LOCAL.get();
         }

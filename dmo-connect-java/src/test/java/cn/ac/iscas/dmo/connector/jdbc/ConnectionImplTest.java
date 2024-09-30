@@ -21,7 +21,8 @@ class ConnectionImplTest {
         sqlServiceUrl = Base64Utils.encodeToStr(sqlServiceUrl);
         try {
             Class.forName("cn.ac.iscas.dmo.connector.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:dmo://192.168.50.49:3282?sqlServiceUrl=" + sqlServiceUrl);
+//            connection = DriverManager.getConnection("jdbc:dmo://192.168.50.49:3282?sqlServiceUrl=" + sqlServiceUrl);
+            connection = DriverManager.getConnection("jdbc:dmo://192.168.50.49:4282?datasourceType=mysql5&datasourceName=mysql-dmo");
             System.out.println(connection);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
