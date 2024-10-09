@@ -95,7 +95,7 @@ public class PreparedStatementImpl extends StatementImpl implements PreparedStat
             sqlData[parameterIndex - 1] = "null";
         } else {
             // 转移单引号
-            x = x.replace("'", "\\'");
+            x = x.replace("'", "''");
             sqlData[parameterIndex - 1] = "'" + x + "'";
         }
     }
