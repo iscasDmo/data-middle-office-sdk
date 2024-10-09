@@ -1,5 +1,6 @@
 package cn.ac.iscas.dmo.connector.jdbc;
 
+import cn.ac.iscas.dmo.connector.support.DmoBlob;
 import cn.ac.iscas.dmo.connector.support.DmoClob;
 import cn.ac.iscas.dmo.connector.util.DateSafeUtils;
 import cn.ac.iscas.dmo.connector.util.LocalDateTimeUtils;
@@ -841,7 +842,10 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public Blob getBlob(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("暂时不支持方法：getBlob");
+        checkClosed();
+        lastData = getObject(columnLabel);
+        return new DmoBlob((byte[])lastData);
+//        throw new UnsupportedOperationException("暂时不支持方法：getBlob");
     }
 
     @Override
