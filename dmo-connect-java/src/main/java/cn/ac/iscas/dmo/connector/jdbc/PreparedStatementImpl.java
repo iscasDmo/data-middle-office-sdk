@@ -1,7 +1,11 @@
 package cn.ac.iscas.dmo.connector.jdbc;
 
+import cn.ac.iscas.dmo.connector.util.Base64Utils;
 import cn.ac.iscas.dmo.connector.util.DateSafeUtils;
+import cn.ac.iscas.dmo.connector.util.IoUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -51,7 +55,9 @@ public class PreparedStatementImpl extends StatementImpl implements PreparedStat
 
     @Override
     public void setBoolean(int parameterIndex, boolean x) throws SQLException {
-        sqlData[parameterIndex - 1] = String.valueOf(x);
+        // todo 暂时这样处理
+        sqlData[parameterIndex - 1] = String.valueOf(x ? 1 : 0);
+//        sqlData[parameterIndex - 1] = String.valueOf(x);
     }
 
     @Override
@@ -132,8 +138,21 @@ public class PreparedStatementImpl extends StatementImpl implements PreparedStat
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        throw new UnsupportedOperationException("暂时不支持方法：setBinaryStream");
+        byte[] bytes = null;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            IoUtils.transferTo(x, baos);
+            bytes = baos.toByteArray();
+        } catch (IOException e) {
+            throw new UnsupportedOperationException("读取不到数据");
+        }
+        String base64Str = Base64Utils.encodeToStr(bytes);
+        String data = "blob data begin:" + base64Str + ":blob data end";
+        sqlData[parameterIndex - 1] = "'" + data + "'";
+//        throw new UnsupportedOperationException("暂时不支持方法：setBinaryStream");
     }
+
+
 
     @Override
     public void clearParameters() throws SQLException {

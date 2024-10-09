@@ -15,15 +15,12 @@ import java.util.regex.Pattern;
 public class Base64Utils {
     private Base64Utils() {}
 
-//    public static String encode(byte[] bytes){
-//        BASE64Encoder decoder = new BASE64Encoder();
-//        return replaceEnter(decoder.encode(bytes));
-//    }
-
     public static String encodeToStr(String uri){
         return Base64.encodeBase64String(uri.getBytes(StandardCharsets.UTF_8));
-//        BASE64Encoder encoder = new BASE64Encoder();
-//        return replaceEnter(encoder.encode(uri.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public static String encodeToStr(byte[] bytes){
+        return Base64.encodeBase64String(bytes);
     }
 
     public static String replaceEnter(String str){
@@ -35,15 +32,6 @@ public class Base64Utils {
 
     public static byte[] decode(String base64Str){
         return Base64.decodeBase64(base64Str);
-//        byte[] b = null;
-//        BASE64Decoder decoder = new BASE64Decoder();
-//
-//        try {
-//            b = decoder.decodeBuffer(replaceEnter(base64Str));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return b;
     }
 
     public static String decodeToStr(String base64Str) {
