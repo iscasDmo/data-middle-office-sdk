@@ -71,7 +71,7 @@ public class ResultSetImpl implements ResultSet {
 
     /**
      * 影响行数
-     * */
+     */
     private int updateCount = 0;
 
     /**
@@ -203,6 +203,17 @@ public class ResultSetImpl implements ResultSet {
         if (lastData instanceof BigDecimal) {
             BigDecimal bigDecimal = (BigDecimal) lastData;
             return 1 == bigDecimal.intValue();
+        } else if (lastData instanceof String) {
+            String str = (String) lastData;
+            return "1".equals(str);
+        } else if (lastData instanceof Integer) {
+            return 1 == (int) lastData;
+        } else if (lastData instanceof Long) {
+            return 1L == (long) lastData;
+        } else if (lastData instanceof Short) {
+            return 1 == (short) lastData;
+        } else if (lastData instanceof Byte) {
+            return 1 == (byte) lastData;
         }
         Boolean bool = (Boolean) lastData;
         return bool != null && bool;
@@ -212,16 +223,26 @@ public class ResultSetImpl implements ResultSet {
     public byte getByte(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
-        Integer integer = (Integer) lastData;
-        return integer == null ? 0 : integer.byteValue();
+        if (lastData == null) {
+            return 0;
+        } else if (lastData instanceof Byte) {
+            return (Byte) lastData;
+        } else {
+            return Byte.parseByte(String.valueOf(lastData));
+        }
     }
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
-        Integer integer = (Integer) lastData;
-        return integer == null ? 0 : integer.byteValue();
+        if (lastData == null) {
+            return 0;
+        } else if (lastData instanceof Short) {
+            return (Short) lastData;
+        } else {
+            return Short.parseShort(String.valueOf(lastData));
+        }
     }
 
     @Override
@@ -244,9 +265,8 @@ public class ResultSetImpl implements ResultSet {
             return (Long) lastData;
         } else if (lastData instanceof Integer) {
             return ((Integer) lastData).longValue();
-        } else {
-            throw new SQLException(String.format("无法将类型为:[%s]的值:[%s]转为long类型", lastData.getClass().getName(), lastData));
         }
+        return Long.parseLong(String.valueOf(lastData));
     }
 
     @Override
@@ -255,15 +275,16 @@ public class ResultSetImpl implements ResultSet {
         lastData = getObject(columnLabel);
         if (Objects.isNull(lastData)) {
             return 0L;
-        } else if (lastData instanceof Long) {
+        } else if (lastData instanceof Float) {
+            return (float) lastData;
+        }  else if (lastData instanceof Long) {
             return ((Long) lastData).floatValue();
         } else if (lastData instanceof Integer) {
             return ((Integer) lastData).floatValue();
         } else if (lastData instanceof Double) {
             return ((Double) lastData).floatValue();
-        } else {
-            throw new SQLException(String.format("无法将类型为:[%s]的值:[%s]转为float类型", lastData.getClass().getName(), lastData));
         }
+        return Float.parseFloat(String.valueOf(lastData));
     }
 
     @Override
@@ -272,15 +293,16 @@ public class ResultSetImpl implements ResultSet {
         lastData = getObject(columnLabel);
         if (Objects.isNull(lastData)) {
             return 0L;
+        } else if (lastData instanceof Double) {
+            return (double) lastData;
         } else if (lastData instanceof Long) {
             return ((Long) lastData).doubleValue();
         } else if (lastData instanceof Integer) {
             return ((Integer) lastData).doubleValue();
         } else if (lastData instanceof Double) {
             return (Double) lastData;
-        } else {
-            throw new SQLException(String.format("无法将类型为:[%s]的值:[%s]转为double类型", lastData.getClass().getName(), lastData));
         }
+        return Double.parseDouble(String.valueOf(lastData));
     }
 
     @Override
@@ -823,7 +845,8 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public Clob getClob(int columnIndex) throws SQLException {
-        return getClob(getDataKey(columnIndex));    }
+        return getClob(getDataKey(columnIndex));
+    }
 
     @Override
     public Array getArray(int columnIndex) throws SQLException {
@@ -844,7 +867,7 @@ public class ResultSetImpl implements ResultSet {
     public Blob getBlob(String columnLabel) throws SQLException {
         checkClosed();
         lastData = getObject(columnLabel);
-        return new DmoBlob((byte[])lastData);
+        return new DmoBlob((byte[]) lastData);
 //        throw new UnsupportedOperationException("暂时不支持方法：getBlob");
     }
 
