@@ -12,16 +12,18 @@ buildscript {
             url "${aliyunGradlePluginUrl}"
             allowInsecureProtocol = true
         }
-        gradlePluginPortal()
         maven {
             url "${gradlePluginUrl}"
             allowInsecureProtocol = true
         }
+        gradlePluginPortal()
         mavenCentral()
 
     }
     dependencies {
         classpath "com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:${shadowJarVersion}"
+        classpath "org.jreleaser:jreleaser-gradle-plugin:${jreleaserVersion}"
+
     }
 }
 
@@ -30,8 +32,10 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
-    //发布至maven中央仓库必须与gitee的子域名一致，所以暂时智能用这个group
-    group = 'cn.ac.iscas'
+    apply plugin: 'org.jreleaser'
+    apply plugin: 'signing'
+    //发布至maven中央仓库必须与github的子域名一致，所以暂时智能用这个group
+    group = 'io.github.iscasdmo'
     version="${driverVersion}"
     sourceCompatibility = "${javaVersion}"
     targetCompatibility = "${javaVersion}"
@@ -96,9 +100,38 @@ subprojects {
     }
     sourceSets.main.resources.srcDirs = ["src/main/java", "src/main/resources"]
 
+//    publishing {
+//        publications {
+//            maven(MavenPublication) {
+//                groupId project.group
+//                artifactId project.name
+//                version project.version
+//                //若是war包，就写components.web,若是jar包，就写components.java
+//                from components.java
+////                artifact shadowJar
+//                artifact sourcesJar
+//            }
+//        }
+//        repositories {
+//            maven {
+//                allowInsecureProtocol = true
+//                if (project.version.endsWith('-SNAPSHOT')) {
+//                    url = "http://172.16.10.190:8181/repository/maven-snapshots/"
+//                } else {
+//                    url = "http://172.16.10.190:8181/repository/maven-releases/"
+//                }
+//
+//                credentials {
+//                    username 'admin'
+//                    password 'admin123'
+//                }
+//            }
+//        }
+//    }
+
     publishing {
         publications {
-            maven(MavenPublication) {
+            mavenJava(MavenPublication) {
                 groupId project.group
                 artifactId project.name
                 version project.version
@@ -106,21 +139,85 @@ subprojects {
                 from components.java
 //                artifact shadowJar
                 artifact sourcesJar
-            }
-        }
-        repositories {
-            maven {
-                allowInsecureProtocol = true
-                if (project.version.endsWith('-SNAPSHOT')) {
-                    url = "http://172.16.10.190:8181/repository/maven-snapshots/"
-                } else {
-                    url = "http://172.16.10.190:8181/repository/maven-releases/"
+                artifact javadocJar
+                pom {
+                    // 构件名称
+                    // 区别于artifactId，可以理解为artifactName
+                    name = 'data-middle-office-sdk'
+//                    packaging = 'jar'
+                    // 构件描述
+                    description = '数据中台sdk'
+                    // 构件主页
+                    url = 'https://github.com/iscasDmo/data-middle-office-sdk'
+                    // 许可证名称和地址
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    // 开发者信息
+                    developers {
+                        developer {
+                            name = 'iscas'
+                            email = '461402005@qq.com'
+                        }
+                    }
+                    // 版本控制仓库地址
+                    scm {
+                        url = 'https://github.com/iscasDmo/data-middle-office-sdk'
+                        connection = 'scm:git:https://github.com/iscasDmo/data-middle-office-sdk.git'
+                        developerConnection = 'scm:git:https://github.com/iscasDmo/data-middle-office-sdk.git'
+                    }
                 }
 
-                credentials {
-                    username 'admin'
-                    password 'admin123'
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
                 }
+            }
+        }
+        // 定义发布到哪里
+        repositories {
+            maven {
+                url = layout.buildDirectory.dir('staging-deploy')
+            }
+        }
+    }
+
+    javadoc {
+        // <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        // 防止本地打开中文乱码
+//        options.addStringOption("charset", "UTF-8")
+        options.encoding = "UTF-8"
+        failOnError = false
+    }
+
+
+    jreleaser {
+        signing {
+            active = 'ALWAYS'
+            armored = true
+            mode = 'FILE'
+            publicKey = 'C:/Users/Administrator/public.pgp'
+            secretKey = 'C:/Users/Administrator/private.pgp'
+        }
+        deploy {
+            maven {
+
+                /* Portal Publisher API */
+                mavenCentral {
+                    sonatype {
+                        active = 'ALWAYS'
+                        url = 'https://central.sonatype.com/api/v1/publisher'
+                        stagingRepository('build/staging-deploy')
+                    }
+                }
+
             }
         }
     }
