@@ -1,11 +1,11 @@
-apply plugin: 'com.github.johnrengelman.shadow'
-
-
-shadowJar {
-    archiveBaseName = 'dmo-connect-java'
-    archiveClassifier = null
-    archiveVersion = "${driverVersion}"
-}
+//apply plugin: 'com.github.johnrengelman.shadow'
+//
+//
+//shadowJar {
+//    archiveBaseName = 'dmo-connect-java'
+//    archiveClassifier = null
+//    archiveVersion = "${driverVersion}"
+//}
 
 dependencies {
     implementation "com.squareup.okhttp3:okhttp:${okHttpVersion}"
