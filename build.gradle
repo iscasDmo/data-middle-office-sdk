@@ -22,7 +22,7 @@ buildscript {
     }
     dependencies {
         classpath "com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:${shadowJarVersion}"
-        classpath group: 'io.github.jeadyx.sonatype-uploader', name: 'io.github.jeadyx.sonatype-uploader.gradle.plugin', version: '2.8'
+        classpath "io.github.jeadyx.sonatype-uploader:io.github.jeadyx.sonatype-uploader.gradle.plugin:${sonatypeUploaderVersion}"
 
     }
 }
