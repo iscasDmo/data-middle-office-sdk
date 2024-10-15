@@ -277,7 +277,7 @@ public class ResultSetImpl implements ResultSet {
             return 0L;
         } else if (lastData instanceof Float) {
             return (float) lastData;
-        }  else if (lastData instanceof Long) {
+        } else if (lastData instanceof Long) {
             return ((Long) lastData).floatValue();
         } else if (lastData instanceof Integer) {
             return ((Integer) lastData).floatValue();
@@ -334,6 +334,17 @@ public class ResultSetImpl implements ResultSet {
         } else if (lastData instanceof java.util.Date) {
             // java.util.Date转为java.sql.Date
             return new Date(((java.util.Date) lastData).getTime());
+        } else if (lastData instanceof LocalDateTime) {
+            LocalDateTime localDateTime = (LocalDateTime) lastData;
+            // todo 时区暂时用默认的
+            java.util.Date utilDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+            return new java.sql.Date(utilDate.getTime());
+        } else if (lastData instanceof LocalDate) {
+            LocalDate localDate = (LocalDate) lastData;
+            LocalDateTime localDateTime = LocalDateTime.of(localDate, LocalTime.of(0, 0));
+            // todo 时区暂时用默认的
+            java.util.Date utilDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+            return new java.sql.Date(utilDate.getTime());
         } else if (lastData instanceof String) {
             // 仅支持yyyy-MM-dd格式的数据
             String data = (String) lastData;
@@ -364,6 +375,15 @@ public class ResultSetImpl implements ResultSet {
         } else if (lastData instanceof java.util.Date) {
             java.util.Date date = (java.util.Date) lastData;
             return new Time(date.getTime());
+        } else if (lastData instanceof LocalDateTime) {
+            LocalDateTime localDateTime = (LocalDateTime) lastData;
+            LocalTime localTime = localDateTime.toLocalTime();
+            return Time.valueOf(localTime);
+        } else if (lastData instanceof LocalDate) {
+            return Time.valueOf("00:00:00");
+        } else if (lastData instanceof LocalTime) {
+            LocalTime localTime = (LocalTime) lastData;
+            return Time.valueOf(localTime);
         } else if (lastData instanceof String) {
             // 仅支持HH:mm:ss格式的数据
             try {
@@ -388,6 +408,13 @@ public class ResultSetImpl implements ResultSet {
         } else if (lastData instanceof java.util.Date) {
             java.util.Date date = (java.util.Date) lastData;
             return new Timestamp(date.getTime());
+        } else if (lastData instanceof LocalDateTime) {
+            LocalDateTime localDateTime = (LocalDateTime) lastData;
+            return Timestamp.valueOf(localDateTime);
+        } else if (lastData instanceof LocalDate) {
+            LocalDate localDate = (LocalDate) lastData;
+            LocalDateTime localDateTime = localDate.atStartOfDay();
+            return Timestamp.valueOf(localDateTime);
         } else if (lastData instanceof String) {
             // 仅支持yyyy-MM-dd HH:mm:ss格式的数据
             try {
