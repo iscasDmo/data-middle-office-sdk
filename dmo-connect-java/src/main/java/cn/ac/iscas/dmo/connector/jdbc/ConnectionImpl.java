@@ -3,8 +3,6 @@ package cn.ac.iscas.dmo.connector.jdbc;
 import cn.ac.iscas.dmo.connector.Constants;
 import cn.ac.iscas.dmo.connector.conf.HostInfo;
 import cn.ac.iscas.dmo.connector.util.Base64Utils;
-import cn.ac.iscas.dmo.connector.util.OkHttpCustomClient;
-import cn.ac.iscas.dmo.connector.util.OkHttpProps;
 import cn.ac.iscas.dmo.db.rpc.GrpcUtils;
 import cn.ac.iscas.dmo.db.rpc.execute.StreamServiceGrpc;
 
@@ -31,8 +29,6 @@ public class ConnectionImpl implements Connection, Constants {
 
     private String datasourceName;
 
-    private OkHttpCustomClient httpClient;
-
     private boolean closed;
 
     private StreamServiceGrpc.StreamServiceBlockingStub stub;
@@ -51,8 +47,6 @@ public class ConnectionImpl implements Connection, Constants {
         createDmoInfo(hostInfo);
         // 初始化grpc
         initGrpc();
-        // 初始化okhttp
-//        initOkHttp(hostInfo);
         // 获取dbType
 //        this.dbType = initDbType();
     }
@@ -405,14 +399,6 @@ public class ConnectionImpl implements Connection, Constants {
         return false;
     }
 
-//    private void createDmoUrl(HostInfo hostInfo) {
-//        token = hostInfo.getToken();
-//        String url = hostInfo.getSqlServiceUrl();
-//        sqlServiceUrl = Base64Utils.decodeToStr(url);
-//
-//        useSsl = hostInfo.getUseSsl();
-//    }
-
     private void createDmoInfo(HostInfo hostInfo) throws SQLException {
         token = hostInfo.getToken();
 
@@ -428,59 +414,6 @@ public class ConnectionImpl implements Connection, Constants {
         datasourceName =  Base64Utils.decodeToStr(tmpDsName);
     }
 
-    private void initOkHttp(HostInfo hostInfo) {
-        OkHttpProps httpProps = new OkHttpProps();
-        // 设置一些额外的参数，在jdbc连接URL中以 ?xx=xxx&yy=yyy的形式配置
-        setAdditionalParam(httpProps, hostInfo);
-        httpClient = new OkHttpCustomClient(httpProps);
-    }
-
-    private void setAdditionalParam(OkHttpProps httpProps, HostInfo hostInfo) {
-        Map<String, String> hostProperties = hostInfo.getHostProperties();
-        if (Objects.nonNull(hostProperties)) {
-            String readTimeout = hostProperties.get("readTimeout");
-            if (Objects.nonNull(readTimeout)) {
-                httpProps.setReadTimeout(Integer.parseInt(readTimeout));
-            }
-            String writeTimeout = hostProperties.get("writeTimeout");
-            if (Objects.nonNull(writeTimeout)) {
-                httpProps.setWriteTimeout(Integer.parseInt(writeTimeout));
-            }
-            String connectTimeout = hostProperties.get("connectTimeout");
-            if (Objects.nonNull(connectTimeout)) {
-                httpProps.setConnectTimeout(Integer.parseInt(connectTimeout));
-            }
-            String maxIdleConnection = hostProperties.get("maxIdleConnection");
-            if (Objects.nonNull(maxIdleConnection)) {
-                httpProps.setMaxIdleConnection(Integer.parseInt(maxIdleConnection));
-            }
-            String keepAliveDuration = hostProperties.get("keepAliveDuration");
-            if (Objects.nonNull(keepAliveDuration)) {
-                httpProps.setKeepAliveDuration(Long.parseLong(keepAliveDuration));
-            }
-            String maxRequests = hostProperties.get("maxRequests");
-            if (Objects.nonNull(maxRequests)) {
-                httpProps.setMaxRequests(Integer.parseInt(maxRequests));
-            }
-            String maxRequestsPerHost = hostProperties.get("maxRequestsPerHost");
-            if (Objects.nonNull(maxRequestsPerHost)) {
-                httpProps.setMaxRequestsPerHost(Integer.parseInt(maxRequestsPerHost));
-            }
-            String interceptorClasses = hostProperties.get("interceptorClasses");
-            if (Objects.nonNull(interceptorClasses)) {
-                httpProps.setInterceptorClasses(interceptorClasses);
-            }
-        }
-    }
-
-//    public String getSqlServiceUrl() {
-//        return sqlServiceUrl;
-//    }
-//
-//    public void setSqlServiceUrl(String sqlServiceUrl) {
-//        this.sqlServiceUrl = sqlServiceUrl;
-//    }
-
     public String getToken() {
         return token;
     }
@@ -489,33 +422,9 @@ public class ConnectionImpl implements Connection, Constants {
         this.token = token;
     }
 
-    public OkHttpCustomClient getHttpClient() {
-        return httpClient;
-    }
-
-    public void setHttpClient(OkHttpCustomClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
-//    public String getUseSsl() {
-//        return useSsl;
-//    }
-//
-//    public void setUseSsl(String useSsl) {
-//        this.useSsl = useSsl;
-//    }
-
     public HostInfo getOrigHostInfo() {
         return origHostInfo;
     }
-
-//    public void setDbType(String dbType) {
-//        this.dbType = dbType;
-//    }
-//
-//    public String getDbType() {
-//        return dbType;
-//    }
 
     public String getDatasourceName() {
         return datasourceName;

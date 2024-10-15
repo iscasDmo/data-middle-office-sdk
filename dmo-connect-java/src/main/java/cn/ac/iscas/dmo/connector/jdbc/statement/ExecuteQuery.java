@@ -48,6 +48,18 @@ public class ExecuteQuery {
                 for (int i = 0; i < metas.size(); i++) {
                     headerMapping.put(i, (String) metas.get(i).get("columnName"));
                 }
+                if (headerMapping.isEmpty() && !values.isEmpty()) {
+                    Map<String, Object> map = values.getFirst();
+                    if (map.containsKey("@@Identity")) {
+                        Object generateId = map.get("@@Identity");
+                        headerMapping.put(0, "@@Identity");
+                        Map<String, Object> meta = new HashMap<>();
+                        meta.put("columnName", "@@Identity");
+                        // todo
+                        meta.put("columnType", -5);
+                        metas.add(meta);
+                    }
+                }
                 rs.setHeaderMapping(headerMapping);
                 rs.setMetas(metas);
             }

@@ -160,6 +160,19 @@ subprojects {
             maven {
                 url = layout.buildDirectory.dir('repo')
             }
+            maven {
+                allowInsecureProtocol = true
+                if (project.version.endsWith('-SNAPSHOT')) {
+                    url = "http://172.16.10.190:8181/repository/maven-snapshots/"
+                } else {
+                    url = "http://172.16.10.190:8181/repository/maven-releases/"
+                }
+
+                credentials {
+                    username 'admin'
+                    password 'admin123'
+                }
+            }
         }
     }
 

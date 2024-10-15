@@ -2,9 +2,17 @@ package cn.ac.iscas.dmo.connector.jdbc;
 
 import cn.ac.iscas.dmo.connector.jdbc.statement.ExecuteQuery;
 import cn.ac.iscas.dmo.connector.jdbc.statement.ExecuteUpdate;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.select.Select;
+import com.alibaba.druid.DbType;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.*;
+import com.alibaba.druid.sql.dialect.odps.ast.*;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleExplainStatement;
+import com.alibaba.druid.sql.dialect.oscar.ast.stmt.OscarSelectStatement;
+import com.alibaba.druid.sql.dialect.oscar.ast.stmt.OscarShowStatement;
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGShowStatement;
+import com.alibaba.druid.sql.dialect.presto.ast.stmt.PrestoSelectStatement;
 
 import java.io.IOException;
 import java.sql.*;
@@ -33,6 +41,52 @@ public class StatementImpl implements DmoStatement {
     public StatementImpl(ConnectionImpl connection) {
         this.connection = connection;
     }
+
+    private static final Class[] SELECT_STATEMENTS = new Class[]{CobarShowStatus.class, DrdsBaselineStatement.class,
+            DrdsShowDDLJobs.class, DrdsShowGlobalIndex.class, DrdsShowMetadataLock.class,
+            MysqlShowCreateFullTextStatement.class, MysqlShowFullTextStatement.class, MysqlShowCreateFullTextStatement.class,
+            MysqlShowDbLockStatement.class, MysqlShowHtcStatement.class, MysqlShowStcStatement.class,
+            MySqlShowAuthorsStatement.class, MySqlExplainPlanCacheStatement.class, MySqlExplainStatement.class,
+            MySqlHelpStatement.class, MySqlHintStatement.class, MySqlShowAuthorsStatement.class,
+            MySqlShowBinLogEventsStatement.class, MySqlShowBinaryLogsStatement.class, MySqlShowBroadcastsStatement.class,
+            MySqlShowCharacterSetStatement.class, MySqlShowClusterNameStatement.class, MySqlShowCollationStatement.class,
+            MySqlShowConfigStatement.class, MySqlShowConfigStatement.class, MySqlShowContributorsStatement.class,
+            MySqlShowCreateDatabaseStatement.class, MySqlShowCreateEventStatement.class, MySqlShowCreateFunctionStatement.class,
+            MySqlShowCreateProcedureStatement.class, MySqlShowCreateTriggerStatement.class, MySqlShowDatabaseStatusStatement.class,
+            MySqlShowDatasourcesStatement.class, MySqlShowDdlStatusStatement.class, MySqlShowDsStatement.class,
+            MySqlShowEngineStatement.class, MySqlShowEnginesStatement.class, MySqlShowErrorsStatement.class,
+            MySqlShowEventsStatement.class, MySqlShowFunctionCodeStatement.class, MySqlShowFunctionStatusStatement.class,
+            MySqlShowGrantsStatement.class, MySqlShowHMSMetaStatement.class, MySqlShowHelpStatement.class,
+            MySqlShowJobStatusStatement.class, MySqlShowMasterLogsStatement.class, MySqlShowMasterStatusStatement.class,
+            MySqlShowMigrateTaskStatusStatement.class, MySqlShowNodeStatement.class, MySqlShowOpenTablesStatement.class,
+            MySqlShowPartitionsStatement.class, MySqlShowPhysicalProcesslistStatement.class, MySqlShowPlanCacheStatement.class,
+            MySqlShowPlanCacheStatusStatement.class, MySqlShowPluginsStatement.class, MySqlShowPrivilegesStatement.class,
+            MySqlShowProcedureCodeStatement.class, MySqlShowProcedureStatusStatement.class, MySqlShowProcessListStatement.class,
+            MySqlShowProfileStatement.class, MySqlShowProfilesStatement.class, MySqlShowRelayLogEventsStatement.class,
+            MySqlShowRuleStatement.class, MySqlShowRuleStatusStatement.class, MySqlShowSequencesStatement.class,
+            MySqlShowSlaveHostsStatement.class, MySqlShowSlaveStatusStatement.class, MySqlShowSlowStatement.class,
+            MySqlShowStatement.class, MySqlShowStatusStatement.class, MySqlShowTableStatusStatement.class,
+            MySqlShowTopologyStatement.class, MySqlShowTraceStatement.class, MySqlShowTriggersStatement.class,
+            MySqlShowWarningsStatement.class, MysqlShowCreateFullTextStatement.class, MysqlShowDbLockStatement.class,
+            MysqlShowFullTextStatement.class, MysqlShowHtcStatement.class, MysqlShowStcStatement.class,
+            OdpsCountStatement.class, OdpsListStmt.class, OdpsQueryAliasStatement.class, OdpsReadStatement.class,
+            OdpsShowChangelogsStatement.class, OdpsShowGrantsStmt.class, OracleExplainStatement.class,
+            OscarSelectStatement.class, OscarShowStatement.class, PGShowStatement.class, PrestoSelectStatement.class,
+            SQLAnalyzeTableStatement.class, SQLDescribeStatement.class, SQLExplainAnalyzeStatement.class,
+            SQLExplainStatement.class, SQLListResourceGroupStatement.class, SQLOptimizeStatement.class,
+            SQLSelectStatement.class, SQLShowACLStatement.class, SQLShowCatalogsStatement.class,
+            SQLShowColumnsStatement.class, SQLShowCreateMaterializedViewStatement.class, SQLShowCreateTableStatement.class,
+            SQLShowCreateViewStatement.class, SQLShowDatabasesStatement.class, SQLShowErrorsStatement.class,
+            SQLShowFunctionsStatement.class, SQLShowGrantsStatement.class, SQLShowHistoryStatement.class,
+            SQLShowIndexesStatement.class, SQLShowMaterializedViewStatement.class, SQLShowOutlinesStatement.class,
+            SQLShowPackagesStatement.class, SQLShowPartitionsStmt.class, SQLShowProcessListStatement.class,
+            SQLShowPartitionsStmt.class, SQLShowProcessListStatement.class, SQLShowQueryTaskStatement.class,
+            SQLShowRecylebinStatement.class, SQLShowRoleStatement.class, SQLShowRolesStatement.class,
+            SQLShowSessionStatement.class, SQLShowStatement.class, SQLShowStatisticStmt.class,
+            SQLShowStatisticListStmt.class, SQLShowTableGroupsStatement.class, SQLShowTablesStatement.class,
+            SQLShowUsersStatement.class, SQLShowVariantsStatement.class, SQLShowViewsStatement.class,
+    };
+
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
@@ -119,20 +173,47 @@ public class StatementImpl implements DmoStatement {
     @Override
     public boolean execute(String sql) throws SQLException {
         checkClosed();
-        try {
-            // 不知道什么原因，出现full时解析就会出错，这里暂时做一下处理，todo
-            String checkSql = sql.replace("full,", "full1,");
-            net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(checkSql);
-            if (statement instanceof Select) {
-                rs = executeQuery(sql);
-                return true;
-            } else {
-                updateCount = executeUpdate(sql);
-                return false;
-            }
-        } catch (JSQLParserException e) {
-            throw new SQLException("SQL解析出错", e);
+//        try {
+        String datasourceType = connection.getDatasourceType();
+        // 不知道什么原因，出现full时解析就会出错，这里暂时做一下处理，todo
+        String checkSql = sql.replace("full,", "full1,");
+
+        DbType dbType = DbType.mysql;
+        if (datasourceType.startsWith("mysql")) {
+            dbType = DbType.mysql;
+        } else if (datasourceType.startsWith("oracle")) {
+            dbType = DbType.oracle;
+        } else if (datasourceType.startsWith("postgresql")) {
+            dbType = DbType.postgresql;
+        } else if (datasourceType.startsWith("dameng")) {
+            dbType = DbType.dm;
+        } else if (datasourceType.startsWith("tdengine")) {
+            dbType = DbType.taosdata;
         }
+        List<SQLStatement> statementList = SQLUtils.parseStatements(checkSql, dbType);
+        if (statementList != null && statementList.size() > 0 && isSelect(statementList.get(0), checkSql, dbType)) {
+            rs = executeQuery(sql);
+            return true;
+        } else {
+            updateCount = executeUpdate(sql);
+            return false;
+        }
+//        } catch (JSQLParserException e) {
+//            throw new SQLException("SQL解析出错", e);
+//        }
+    }
+
+    private boolean isSelect(SQLStatement statement, String checkSql, DbType dbType) {
+        if (DbType.mysql == dbType || checkSql.toLowerCase().contains("select @@identity")) {
+            return true;
+        }
+
+        for (Class selectStatement : SELECT_STATEMENTS) {
+            if (statement.getClass() == selectStatement) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
