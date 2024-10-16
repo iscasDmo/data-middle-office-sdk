@@ -48,7 +48,7 @@ public class ExecuteQuery {
                     headerMapping.put(i, (String) metas.get(i).get("columnName"));
                 }
                 // 处理自增字段
-                handleIdentity(headerMapping, values, metas);
+//                handleIdentity(headerMapping, values, metas);
                 rs.setHeaderMapping(headerMapping);
                 rs.setMetas(metas);
             }
