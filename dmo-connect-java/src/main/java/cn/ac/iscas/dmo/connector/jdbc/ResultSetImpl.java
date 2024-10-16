@@ -3,19 +3,21 @@ package cn.ac.iscas.dmo.connector.jdbc;
 import cn.ac.iscas.dmo.connector.support.DmoBlob;
 import cn.ac.iscas.dmo.connector.support.DmoClob;
 import cn.ac.iscas.dmo.connector.util.DateSafeUtils;
+import cn.ac.iscas.dmo.connector.util.IoUtils;
 import cn.ac.iscas.dmo.connector.util.LocalDateTimeUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.text.ParseException;
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 结果集实现
@@ -78,6 +80,7 @@ public class ResultSetImpl implements ResultSet {
      * 游标
      */
     private int cursor = -1;
+
 
     public ResultSetImpl(DmoStatement statement) {
         this.statement = statement;
@@ -320,7 +323,26 @@ public class ResultSetImpl implements ResultSet {
 
     @Override
     public byte[] getBytes(String columnLabel) throws SQLException {
-        throw new UnsupportedOperationException("暂时不支持方法：getBytes");
+        lastData = getObject(columnLabel);
+        if (Objects.isNull(lastData)) {
+            return null;
+        } else if (lastData instanceof byte[]) {
+            byte[] bytes = (byte[]) lastData;
+            return bytes.length == 0 ? null : bytes;
+        } else if (lastData instanceof Blob) {
+            Blob blob = (Blob) lastData;
+            InputStream binaryStream = blob.getBinaryStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            try {
+                IoUtils.transferTo(binaryStream, byteArrayOutputStream);
+            } catch (IOException e) {
+                throw new SQLException(e);
+            }
+            return byteArrayOutputStream.toByteArray();
+        } else {
+            throw new UnsupportedOperationException(String.format("暂时不支持getBytes中获取类型为:[%s]的数据", lastData.getClass().getName()));
+        }
+
     }
 
     @Override
@@ -1483,4 +1505,5 @@ public class ResultSetImpl implements ResultSet {
     public void setMetas(List<Map<String, Object>> metas) {
         this.metas = metas;
     }
+
 }

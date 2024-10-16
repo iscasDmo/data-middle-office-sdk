@@ -8,15 +8,11 @@
 //}
 
 dependencies {
-//    implementation "com.squareup.okhttp3:okhttp:${okHttpVersion}"
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-//    implementation "com.github.jsqlparser:jsqlparser:${jsqlparserVersion}"
     implementation "commons-codec:commons-codec:${commonsCodecVersion}"
     implementation "io.grpc:grpc-all:${grpcVersion}"
     implementation "javax.annotation:javax.annotation-api:${javaxAnnotationVersion}"
-    implementation group: 'com.alibaba', name: 'druid', version: '1.2.23'
-
-
+    implementation "com.alibaba:druid:${druidVersion}"
 }

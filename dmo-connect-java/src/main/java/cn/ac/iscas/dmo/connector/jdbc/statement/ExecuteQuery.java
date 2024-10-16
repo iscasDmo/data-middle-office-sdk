@@ -3,19 +3,17 @@ package cn.ac.iscas.dmo.connector.jdbc.statement;
 import cn.ac.iscas.dmo.connector.conf.HostInfo;
 import cn.ac.iscas.dmo.connector.jdbc.ConnectionImpl;
 import cn.ac.iscas.dmo.connector.jdbc.ResultSetImpl;
+import cn.ac.iscas.dmo.connector.jdbc.StatementImpl;
 import cn.ac.iscas.dmo.connector.util.JdkSerializableUtils;
-import cn.ac.iscas.dmo.connector.util.JsonUtils;
 import cn.ac.iscas.dmo.db.rpc.execute.ExecuteRequest;
 import cn.ac.iscas.dmo.db.rpc.execute.ExecuteResponse;
 import cn.ac.iscas.dmo.db.rpc.execute.StreamServiceGrpc;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.*;
 import com.google.protobuf.ByteString;
 
 import java.io.IOException;
-import java.sql.SQLException;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -29,7 +27,8 @@ import java.util.*;
 public class ExecuteQuery {
 
     public static void execute(ResultSetImpl rs, String sql) throws SQLException, IOException {
-        ConnectionImpl connection = (ConnectionImpl) rs.getStatement().getConnection();
+        Statement statement = rs.getStatement();
+        ConnectionImpl connection = (ConnectionImpl) statement.getConnection();
         Map<String, Object> mapValue = doExecute(connection, sql);
         List<Map<String, Object>> values = new ArrayList<>();
         if (mapValue != null) {
@@ -48,23 +47,70 @@ public class ExecuteQuery {
                 for (int i = 0; i < metas.size(); i++) {
                     headerMapping.put(i, (String) metas.get(i).get("columnName"));
                 }
-                if (headerMapping.isEmpty() && !values.isEmpty()) {
-                    Map<String, Object> map = values.getFirst();
-                    if (map.containsKey("@@Identity")) {
-                        Object generateId = map.get("@@Identity");
-                        headerMapping.put(0, "@@Identity");
-                        Map<String, Object> meta = new HashMap<>();
-                        meta.put("columnName", "@@Identity");
-                        // todo
-                        meta.put("columnType", -5);
-                        metas.add(meta);
-                    }
-                }
+                // 处理自增字段
+                handleIdentity(headerMapping, values, metas);
                 rs.setHeaderMapping(headerMapping);
                 rs.setMetas(metas);
             }
+            Object generateValue = mapValue.get("generateValue");
+            if (Objects.nonNull(generateValue)) {
+                ((StatementImpl) statement).setGenerateValue(generateValue);
+            }
         }
         rs.setCacheData(values);
+    }
+
+    private static void handleIdentity(Map<Integer, String> headerMapping, List<Map<String, Object>> values, List<Map<String, Object>> metas) {
+        if (headerMapping.isEmpty() && !values.isEmpty()) {
+            Map<String, Object> map = values.get(0);
+            if (map.containsKey("@@Identity")) {
+                Object generateId = map.get("@@Identity");
+                headerMapping.put(0, "@@Identity");
+                Map<String, Object> meta = new HashMap<>();
+                meta.put("columnName", "@@Identity");
+
+                // 根据返回的generateId，生成对应的jdbcType
+                JDBCType jdbcType = JDBCType.BIGINT;
+                if (generateId instanceof String) {
+                    jdbcType = JDBCType.VARCHAR;
+                } else if (generateId instanceof BigDecimal) {
+                    jdbcType = JDBCType.NUMERIC;
+                } else if (generateId instanceof Boolean) {
+                    jdbcType = JDBCType.BIT;
+                } else if (generateId instanceof Byte) {
+                    jdbcType = JDBCType.TINYINT;
+                } else if (generateId instanceof Short) {
+                    jdbcType = JDBCType.SMALLINT;
+                } else if (generateId instanceof Integer) {
+                    jdbcType = JDBCType.INTEGER;
+                } else if (generateId instanceof Long) {
+                    jdbcType = JDBCType.BIGINT;
+                } else if (generateId instanceof Float) {
+                    jdbcType = JDBCType.REAL;
+                } else if (generateId instanceof Double) {
+                    jdbcType = JDBCType.DOUBLE;
+                } else if (generateId instanceof byte[]) {
+                    jdbcType = JDBCType.BINARY;
+                } else if (generateId instanceof java.sql.Date) {
+                    jdbcType = JDBCType.DATE;
+                } else if (generateId instanceof java.sql.Timestamp) {
+                    jdbcType = JDBCType.TIMESTAMP;
+                } else if (generateId instanceof Time) {
+                    jdbcType = JDBCType.TIME;
+                } else if (generateId instanceof Clob) {
+                    jdbcType = JDBCType.CLOB;
+                } else if (generateId instanceof Blob) {
+                    jdbcType = JDBCType.BLOB;
+                } else if (generateId instanceof Array) {
+                    jdbcType = JDBCType.ARRAY;
+                } else if (generateId instanceof URL) {
+                    jdbcType = JDBCType.DATALINK;
+                }
+
+                meta.put("columnType", jdbcType.getVendorTypeNumber());
+                metas.add(meta);
+            }
+        }
     }
 
 //    public static Map<String, Object> doExecute(ConnectionImpl connection, String sql) throws SQLException, IOException {
