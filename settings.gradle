@@ -1,3 +1,4 @@
 rootProject.name = "data-middle-office-sdk"
 include 'dmo-connect-java'
+include 'dmo-api-sdk'
 

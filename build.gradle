@@ -37,7 +37,7 @@ subprojects {
     apply plugin: 'io.github.jeadyx.sonatype-uploader'
     //发布至maven中央仓库必须与github的子域名一致，所以暂时智能用这个group
     group = 'io.github.iscasdmo'
-    version="${driverVersion}"
+    version="${projectVersion}"
     sourceCompatibility = "${javaVersion}"
     targetCompatibility = "${javaVersion}"
 
@@ -57,25 +57,9 @@ subprojects {
 
         mavenCentral()
     }
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-    }
-    tasks.withType(Javadoc) {
-        options.encoding = "UTF-8"
-    }
 
     dependencies {
-        //junit
-        testImplementation("junit:junit:${junitVersion}")
-
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: "${jupiterVersion}"
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "${jupiterVersion}"
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: "${jupiterVersion}"
-        testImplementation group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "${jupiterVersion}"
-        testImplementation group: 'org.junit.platform', name: 'junit-platform-launcher', version: "${junitPlatformVersion}"
-        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: "${junitPlatformVersion}"
-        testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: "${junitPlatformVersion}"
-
+        testImplementation group: 'junit', name: 'junit', version: "${junitVersion}"
     }
 
     // java编译的时候缺省状态下会因为中文字符而失败
@@ -215,8 +199,9 @@ subprojects {
     }
 
     tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
+        options.encoding = "UTF-8"
     }
+
     //javadoc，如果用jdk11，默认就支持中文
 //查看可以配置的属性：https://docs.gradle.org/current/javadoc/org/gradle/external/javadoc/StandardJavadocDocletOptions.html
     tasks.withType(Javadoc) {

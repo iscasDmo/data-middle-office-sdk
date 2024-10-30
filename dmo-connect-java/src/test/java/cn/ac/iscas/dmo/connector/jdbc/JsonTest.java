@@ -5,8 +5,10 @@ import cn.ac.iscas.dmo.connector.jdbc.model.B;
 import cn.ac.iscas.dmo.connector.jdbc.model.TestModel;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -21,13 +23,13 @@ import java.util.Map;
  * @version 1.0
  * @date 2024/9/29 9:33
  */
-
+@RunWith(JUnit4.class)
 public class JsonTest {
     private TestModel testModel;
     private String testModelJson;
 
-    @BeforeEach
-    void before() {
+    @Before
+    public void init() {
         testModel = new TestModel();
         B b = new B();
         b.setC3(0.5);
@@ -81,4 +83,5 @@ public class JsonTest {
         jsonReader.endObject();
 
     }
+
 }

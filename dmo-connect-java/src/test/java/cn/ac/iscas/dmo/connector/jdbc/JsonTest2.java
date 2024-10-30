@@ -10,9 +10,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -32,8 +31,8 @@ public class JsonTest2 {
     private TestModel testModel;
     private String testModelJson;
 
-    @BeforeEach
-    void before() {
+    @Before
+    public void before() {
         testModel = new TestModel();
         B b = new B();
         b.setC3(0.5);

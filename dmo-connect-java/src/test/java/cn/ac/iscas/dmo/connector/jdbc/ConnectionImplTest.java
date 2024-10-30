@@ -1,8 +1,10 @@
 package cn.ac.iscas.dmo.connector.jdbc;
 
 import cn.ac.iscas.dmo.connector.util.Base64Utils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.sql.*;
 
@@ -11,18 +13,19 @@ import java.sql.*;
  * @version 1.0
  * @date 2024/9/23 16:20
  */
-
-class ConnectionImplTest {
+@RunWith(JUnit4.class)
+public class ConnectionImplTest {
     Connection connection = null;
 
-    @BeforeEach
+    @Before
     public void testConnection() {
-        String sqlServiceUrl = "/dmo/data-service/主题域1/mysql-dmo/DYNAMIC_SQL/1727079751976";
-        sqlServiceUrl = Base64Utils.encodeToStr(sqlServiceUrl);
+        String datasourceType = Base64Utils.encodeToStr("mysql5");
+        String datasourceName = Base64Utils.encodeToStr("mysql-dmo");
         try {
             Class.forName("cn.ac.iscas.dmo.connector.jdbc.Driver");
 //            connection = DriverManager.getConnection("jdbc:dmo://192.168.50.49:3282?sqlServiceUrl=" + sqlServiceUrl);
-            connection = DriverManager.getConnection("jdbc:dmo://192.168.50.49:4282?datasourceType=mysql5&datasourceName=mysql-dmo");
+            connection = DriverManager.getConnection("jdbc:dmo://192.168.50.49:4282?datasourceType="
+                    + datasourceType + "&datasourceName=" + datasourceName);
             System.out.println(connection);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
