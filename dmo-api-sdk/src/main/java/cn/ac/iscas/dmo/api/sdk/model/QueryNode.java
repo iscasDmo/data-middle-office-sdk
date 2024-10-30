@@ -2,6 +2,7 @@ package cn.ac.iscas.dmo.api.sdk.model;
 
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class QueryNode {
     /**
      * 子节点
      */
-    private List<QueryNode> children;
+    private List<QueryNode> children = new ArrayList<QueryNode>();
 
     public NodeType getType() {
         return type;

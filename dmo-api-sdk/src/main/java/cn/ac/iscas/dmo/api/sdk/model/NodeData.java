@@ -32,24 +32,27 @@ public class NodeData {
         return param;
     }
 
-    public void setParam(String param) {
+    public NodeData setParam(String param) {
         this.param = param;
+        return this;
     }
 
     public NodeOperator getOperator() {
         return operator;
     }
 
-    public void setOperator(NodeOperator operator) {
+    public NodeData setOperator(NodeOperator operator) {
         this.operator = operator;
+        return this;
     }
 
     public List<Object> getValue() {
         return value;
     }
 
-    public void setValue(List<Object> value) {
+    public NodeData setValue(List<Object> value) {
         this.value = value;
+        return this;
     }
 
 }

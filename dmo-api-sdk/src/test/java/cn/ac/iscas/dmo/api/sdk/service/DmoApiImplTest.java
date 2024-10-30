@@ -10,10 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author zhuquanwen
@@ -31,18 +28,23 @@ public class DmoApiImplTest {
 
     /**
      * 新增的URL - 拷贝自数据中台
-     * */
+     */
     private final static String TEST_ADD_URL = "/dmo/data-service/主题域1/mysql-dmo/ods_test03/INSERT/1730191311529";
 
     /**
      * 修改的URL - 拷贝自数据中台
-     * */
+     */
     private final static String TEST_EDIT_URL = "/dmo/data-service/主题域1/mysql-dmo/ods_test03/UPDATE/1730193456839";
 
     /**
      * 删除的URL - 拷贝自数据中台
-     * */
+     */
     private final static String TEST_DELETE_URL = "/dmo/data-service/主题域1/mysql-dmo/ods_test03/DELETE/1730255582758";
+
+    /**
+     * 动态SQL的URL - 拷贝自数据中台
+     * */
+    private final static String TEST_DYNAMIC_SQL_URL = "/dmo/data-service/主题域1/mysql-dmo/DYNAMIC_SQL/1729737225913";
 
     /**
      * 普通认证的TOKEN
@@ -53,12 +55,12 @@ public class DmoApiImplTest {
 
     /**
      * 签名模式的appId
-     * */
+     */
     private final static String APP_ID = "18449783-dd52-42aa-8e7e-5b9f9c3c8418";
 
     /**
      * 签名模式的appSecret
-     * */
+     */
     private final static String APP_SECRET = "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDHIaIbkrKQZGm" +
             "P15ecUkxI1ozy99Q5W4irvWOSeU57VSkI0m4AbVa/dVfFt6MwO9rExg4Sri3ppeuACyAxS32TKVEdnvwf308q/QEB/44i" +
             "8bwdB9Lj+B8HucwS2GpChJzbJdoZteaB8K8vc+xpp76clpSvDbswjhYXH4fe+ocdRsyciQSYfcFAighb9+Y" +
@@ -214,7 +216,6 @@ public class DmoApiImplTest {
     }
 
 
-
     /**
      * 删除-普通认证
      */
@@ -237,9 +238,56 @@ public class DmoApiImplTest {
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
 
+    /**
+     * 执行动态SQL-不认证
+     */
+    @Test
+    public void testDynamicSql1() throws DmoApiSdkException {
+        String sql = createDynamicSql();
+        ResponseEntity<Object> res = dmoApi1.dynamicSql(TEST_DYNAMIC_SQL_URL, sql, DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+
+    /**
+     * 执行动态SQL-普通认证
+     */
+    @Test
+    public void testDynamicSql2() throws DmoApiSdkException {
+        String sql = createDynamicSql();
+        ResponseEntity<Object> res = dmoApi2.dynamicSql(TEST_DYNAMIC_SQL_URL, sql, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 执行动态SQL-签名认证
+     */
+    @Test
+    public void testDynamicSql3() throws DmoApiSdkException {
+        String sql = createDynamicSql();
+        ResponseEntity<Object> res = dmoApi3.dynamicSql(TEST_DYNAMIC_SQL_URL, sql, DataServiceAuthenticationType.SIGN);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
 
     private static DmoRequest createSearchRequest() {
-        DmoRequest request = new DmoRequest();
+        // 相当于查询 select * from xxx where id > 1 and name like '%三'
+        DmoRequest request = DmoRequest.builder()
+                .page(1, 10)
+                .node(n -> n.nodeBuilder()
+                        .type(NodeType.AND)
+                        .child(x -> x.nodeBuilder()
+                                .type(NodeType.LEAF)
+                                .data(new NodeData().setParam("id").setOperator(NodeOperator.GT).setValue(Collections.singletonList(1)))
+                                .build())
+                        .child(x -> x.nodeBuilder()
+                                .type(NodeType.LEAF)
+                                .data(new NodeData().setParam("name").setOperator(NodeOperator.LIKE_RIGHT).setValue(Collections.singletonList("三")))
+                                .build())
+                        .build())
+                .build();
         request.setPageNumber(1);
         request.setPageSize(10);
         return request;
@@ -260,19 +308,27 @@ public class DmoApiImplTest {
     private static List<UpdateEntity> createUpdateEntities() {
         List<UpdateEntity> updateEntities = new ArrayList<>();
         UpdateEntity updateEntity = new UpdateEntity();
-        updateEntity.setUpdateBy(new HashMap<String, Object>(){{put("id", 17);}});
-        updateEntity.setData(new HashMap<String, Object>(){{put("name", "大李四");}});
+        updateEntity.setUpdateBy(new HashMap<String, Object>() {{
+            put("id", 17);
+        }});
+        updateEntity.setData(new HashMap<String, Object>() {{
+            put("name", "大李四");
+        }});
         updateEntities.add(updateEntity);
         return updateEntities;
     }
 
     private List<Map<String, Object>> createDeleteEntities() {
         List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> item1 = new HashMap<String, Object>(){{
+        Map<String, Object> item1 = new HashMap<String, Object>() {{
             put("id", 18);
         }};
         list.add(item1);
         return list;
+    }
+
+    private String createDynamicSql() {
+        return "SELECT * FROM dict_data";
     }
 
 }

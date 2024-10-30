@@ -12,6 +12,10 @@ import cn.ac.iscas.dmo.api.sdk.util.SignApiUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +173,29 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException(e);
         }
         return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {});
+    }
+
+    @Override
+    public ResponseEntity<Object> dynamicSql(String url, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        CheckUtils.checkNone(sql, "sql不能为空");
+        String jsonBody = "";
+//        String sqlParam = "sql=" + sql;
+        String encodeParam;
+        try {
+            encodeParam = "sql=" + URLEncoder.encode(sql, "UTF-8").replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
+        }
+
+        Map<String, String> header = createHeader(authenticationType, "POST", url + "?" + encodeParam, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + "?sql=" + sql, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
     }
 
     private Map<String, String> createHeader(DataServiceAuthenticationType type, String httpMethod,

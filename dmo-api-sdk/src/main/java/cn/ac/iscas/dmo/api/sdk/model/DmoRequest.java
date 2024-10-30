@@ -1,5 +1,6 @@
 package cn.ac.iscas.dmo.api.sdk.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +48,82 @@ public class DmoRequest {
      * 显示的列
      */
     private Set<String> showColumns;
+
+    public static DmoRequestBuilder builder() {
+        return new DmoRequestBuilder();
+    }
+
+    public static class DmoRequestBuilder {
+        private DmoRequest request = new DmoRequest();
+        public DmoRequestBuilder node(NodeCreator creator) {
+            QueryNode queryNode = creator.create(this);
+            request.setNode(queryNode);
+            return this;
+        }
+
+        public DmoRequestBuilder pageNumber(int pageNumber) {
+            request.setPageNumber(pageNumber);
+            return this;
+        }
+
+        public DmoRequestBuilder pageSize(int pageSize) {
+            request.setPageSize(pageSize);
+            return this;
+        }
+
+        public DmoRequestBuilder page(int pageNumber, int pageSize) {
+            request.setPageSize(pageSize);
+            request.setPageNumber(pageNumber);
+            return this;
+        }
+
+        public QueryNodeBuilder nodeBuilder() {
+            return new QueryNodeBuilder();
+        }
+
+        public DmoRequest build() {
+            return request;
+        }
+    }
+
+    public static class QueryNodeBuilder {
+        private QueryNode queryNode = new QueryNode();
+
+        public QueryNodeBuilder type(NodeType nodeType) {
+            queryNode.setType(nodeType);
+            return this;
+        }
+
+        public QueryNodeBuilder data(NodeData nodeData) {
+            queryNode.setData(nodeData);
+            return this;
+        }
+
+        public QueryNodeBuilder child(NodeCreator2 creator2) {
+            QueryNode queryNode2 = creator2.create(this);
+            queryNode.getChildren().add(queryNode2);
+            return this;
+        }
+
+        public QueryNodeBuilder nodeBuilder() {
+            return new QueryNodeBuilder();
+        }
+
+        public QueryNode build() {
+            return queryNode;
+        }
+    }
+
+    @FunctionalInterface
+    public interface NodeCreator {
+        QueryNode create(DmoRequestBuilder builder);
+    }
+
+    @FunctionalInterface
+    public interface NodeCreator2 {
+        QueryNode create(QueryNodeBuilder builder);
+    }
+
 
     public int getPageNumber() {
         return pageNumber;

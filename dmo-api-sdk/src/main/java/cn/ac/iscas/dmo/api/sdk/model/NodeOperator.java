@@ -14,9 +14,13 @@ public enum NodeOperator {
 
     NOT_IN("NOT IN", "NOT_IN", "不包含"),
 
-    LIKE("LIKE", "LIKE", "通配符匹配"),
+    LIKE("LIKE", "LIKE", "模糊匹配"),
 
-    NOT_LIKE("NOT LIKE", "NOT_LIKE", "包含"),
+    LIKE_LEFT("LIKE LEFT", "LIKE_LEFT", "模糊匹配(右加百分号)"),
+
+    LIKE_RIGHT("LIKE RIGHT", "LIKE_RIGHT", "模糊匹配(左加百分号)"),
+
+    NOT_LIKE("NOT LIKE", "NOT_LIKE", "模糊匹配的非"),
 
     EQ("=", "EQ", "等于"),
 

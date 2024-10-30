@@ -76,4 +76,16 @@ public interface IDmoApi {
      */
     ResponseEntity<Void> delete(String url, List<Map<String, Object>> deleteEntities, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
+    /**
+     * 动态SQL
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param sql     sql语句
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/10/30
+     * @since jdk1.8
+     */
+    ResponseEntity<Object> dynamicSql(String url, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
 }
