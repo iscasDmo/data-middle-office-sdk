@@ -14,12 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author zhuquanwen
@@ -112,7 +107,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<SearchResult>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<SearchResult>>() {
+        });
     }
 
     @Override
@@ -127,7 +123,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {
+        });
     }
 
     @Override
@@ -142,7 +139,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {
+        });
     }
 
     @Override
@@ -157,7 +155,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {
+        });
     }
 
     @Override
@@ -172,7 +171,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {
+        });
     }
 
     @Override
@@ -196,6 +196,105 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException(e);
         }
         return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Object> customSql(String url, List<Object> data, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        CheckUtils.checkNone(data, "data");
+        String jsonBody = JsonUtils.toJson(data);
+        Map<String, String> header = createHeader(authenticationType, "POST", url, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<List<Dic>> searchDic(String url, String businessName, String dicType, String dicName) throws DmoApiSdkException {
+        // TODO 暂时字典查询没有验证
+        DataServiceAuthenticationType authenticationType = DataServiceAuthenticationType.NONE;
+
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = "";
+        List<String> params = new ArrayList<>();
+        List<String> oriParams = new ArrayList<>();
+        try {
+            if (businessName != null) {
+                params.add("businessName=" + URLEncoder.encode(businessName, "UTF-8").replace("+", "%20"));
+                oriParams.add("businessName=" + businessName);
+            }
+            if (dicType != null) {
+                params.add("dicType=" + URLEncoder.encode(dicType, "UTF-8").replace("+", "%20"));
+                oriParams.add("dicType=" + dicType);
+            }
+            if (dicName != null) {
+                params.add("dicName=" + URLEncoder.encode(dicName, "UTF-8").replace("+", "%20"));
+                oriParams.add("dicName=" + dicName);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
+        }
+        String paramString = "";
+        String oriParamString = "";
+        if (!params.isEmpty()) {
+            paramString = "?" + String.join("&", params);
+            oriParamString = "?" + String.join("&", oriParams);
+        }
+
+        Map<String, String> header = createHeader(authenticationType, "GET", url + paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doGet(dmoEndpoint + url + oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Dic>>>() {});
+    }
+
+    @Override
+    public ResponseEntity<List<Param>> searchParam(String url, String businessName, String paramKey, String paramName) throws DmoApiSdkException {
+        // TODO 暂时参数查询没有验证
+        DataServiceAuthenticationType authenticationType = DataServiceAuthenticationType.NONE;
+
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = "";
+        List<String> params = new ArrayList<>();
+        List<String> oriParams = new ArrayList<>();
+        try {
+            if (businessName != null) {
+                params.add("businessName=" + URLEncoder.encode(businessName, "UTF-8").replace("+", "%20"));
+                oriParams.add("businessName=" + businessName);
+            }
+            if (paramKey != null) {
+                params.add("paramKey=" + URLEncoder.encode(paramKey, "UTF-8").replace("+", "%20"));
+                oriParams.add("paramKey=" + paramKey);
+            }
+            if (paramName != null) {
+                params.add("paramName=" + URLEncoder.encode(paramName, "UTF-8").replace("+", "%20"));
+                oriParams.add("paramName=" + paramName);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
+        }
+        String paramString = "";
+        String oriParamString = "";
+        if (!params.isEmpty()) {
+            paramString = "?" + String.join("&", params);
+            oriParamString = "?" + String.join("&", oriParams);
+        }
+
+        Map<String, String> header = createHeader(authenticationType, "GET", url + paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doGet(dmoEndpoint + url + oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Param>>>() {});
     }
 
     private Map<String, String> createHeader(DataServiceAuthenticationType type, String httpMethod,

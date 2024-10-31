@@ -80,12 +80,50 @@ public interface IDmoApi {
      * 动态SQL
      *
      * @param url                接口URL，从数据中台获取
-     * @param sql     sql语句
+     * @param sql                sql语句
      * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
      * @return 响应结果
      * @date 2024/10/30
      * @since jdk1.8
      */
     ResponseEntity<Object> dynamicSql(String url, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 自定义SQL
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param data               数据
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/10/30
+     * @since jdk1.8
+     */
+    ResponseEntity<Object> customSql(String url, List<Object> data, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 字典查询
+     *
+     * @param url          接口URL，从数据中台获取
+     * @param businessName 业务应用名 可以为空
+     * @param dicType      字典类型  可以为空
+     * @param dicName      字典名 可以为空
+     * @return 响应结果
+     * @date 2024/10/30
+     * @since jdk1.8
+     */
+    ResponseEntity<List<Dic>> searchDic(String url, String businessName, String dicType, String dicName) throws DmoApiSdkException;
+
+    /**
+     * 参数查询
+     *
+     * @param url          接口URL，从数据中台获取
+     * @param businessName 业务应用名 可以为空
+     * @param paramKey     参数key  可以为空
+     * @param paramName    参数名称 可以为空
+     * @return 响应结果
+     * @date 2024/10/30
+     * @since jdk1.8
+     */
+    ResponseEntity<List<Param>> searchParam(String url, String businessName, String paramKey, String paramName) throws DmoApiSdkException;
 
 }

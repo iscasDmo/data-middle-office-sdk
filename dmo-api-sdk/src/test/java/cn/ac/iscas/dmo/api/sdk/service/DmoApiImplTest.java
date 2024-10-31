@@ -43,8 +43,23 @@ public class DmoApiImplTest {
 
     /**
      * 动态SQL的URL - 拷贝自数据中台
-     * */
+     */
     private final static String TEST_DYNAMIC_SQL_URL = "/dmo/data-service/主题域1/mysql-dmo/DYNAMIC_SQL/1729737225913";
+
+    /**
+     * 自定义SQL的URL - 拷贝自数据中台
+     */
+    private final static String TEST_CUSTOM_SQL_URL = "/dmo/data-service/主题域1/mysql-dmo/EXECUTESQL/23";
+
+    /**
+     * 字典查询的URL - 拷贝自数据中台
+     */
+    private final static String TEST_DIC_SEARCH_URL = "/dmo/dic-service/search";
+
+    /**
+     * 参数查询的URL - 拷贝自数据中台
+     */
+    private final static String TEST_PARAM_SEARCH_URL = "/dmo/param-service/search";
 
     /**
      * 普通认证的TOKEN
@@ -272,6 +287,59 @@ public class DmoApiImplTest {
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
 
+    /**
+     * 自定义SQL-不认证
+     */
+    @Test
+    public void testCustomSql1() throws DmoApiSdkException {
+        List<Object> data = createCustomData();
+        ResponseEntity<Object> res = dmoApi1.customSql(TEST_CUSTOM_SQL_URL, data, DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 自定义SQL-普通认证
+     */
+    @Test
+    public void testCustomSql2() throws DmoApiSdkException {
+        List<Object> data = createCustomData();
+        ResponseEntity<Object> res = dmoApi2.customSql(TEST_CUSTOM_SQL_URL, data, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 自定义SQL-签名认证
+     */
+    @Test
+    public void testCustomSql3() throws DmoApiSdkException {
+        List<Object> data = createCustomData();
+        ResponseEntity<Object> res = dmoApi3.customSql(TEST_CUSTOM_SQL_URL, data, DataServiceAuthenticationType.SIGN);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 字典查询-不认证
+     */
+    @Test
+    public void testDic1() throws DmoApiSdkException {
+        ResponseEntity<List<Dic>> res = dmoApi1.searchDic(TEST_DIC_SEARCH_URL, null, "sys.backup.status", null);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 参数查询-不认证
+     */
+    @Test
+    public void testParam1() throws DmoApiSdkException {
+        ResponseEntity<List<Param>> res = dmoApi1.searchParam(TEST_PARAM_SEARCH_URL, null, "sys.super.user.default.pwd", null);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
     private static DmoRequest createSearchRequest() {
         // 相当于查询 select * from xxx where id > 1 and name like '%三'
         DmoRequest request = DmoRequest.builder()
@@ -329,6 +397,10 @@ public class DmoApiImplTest {
 
     private String createDynamicSql() {
         return "SELECT * FROM dict_data";
+    }
+
+    private List<Object> createCustomData() {
+        return Arrays.asList(1);
     }
 
 }
