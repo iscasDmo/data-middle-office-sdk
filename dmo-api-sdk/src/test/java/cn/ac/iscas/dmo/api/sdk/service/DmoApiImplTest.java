@@ -1,6 +1,7 @@
 package cn.ac.iscas.dmo.api.sdk.service;
 
 import cn.ac.iscas.dmo.api.sdk.exception.DmoApiSdkException;
+import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpProps;
 import cn.ac.iscas.dmo.api.sdk.model.*;
 import cn.ac.iscas.dmo.api.sdk.service.impl.DmoApiImpl;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -80,6 +82,46 @@ public class DmoApiImplTest {
      * 高级删除的URL - 拷贝自数据中台
      */
     private final static String TEST_ADVANCE_DELETE_URL = "/dmo/data-service/advance_delete";
+
+    /**
+     * 测试文件上传
+     * */
+    private final static String TEST_UPLOAD_FILE_URL = "/dmo/file-service/主题域1/local-file/upload";
+
+    /**
+     * 单个文件下载
+     * */
+    private final static String TEST_DOWNLOAD_FILE_URL = "/dmo/file-service/主题域1/local-file/download";
+
+    /**
+     * 多文件下载
+     * */
+    private final static String TEST_DOWNLOADS_FILE_URL = "/dmo/file-service/主题域1/local-file/downloads";
+
+    /**
+     * 获取文件列表
+     * */
+    private final static String TEST_LS_FILE_URL = "/dmo/file-service/主题域1/local-file/ls";
+
+    /**
+     * 创建文件夹
+     * */
+    private final static String TEST_MKDIRS_FILE_URL = "/dmo/file-service/主题域1/local-file/mkdirs";
+
+    /**
+     * 删除文件
+     * */
+    private final static String TEST_RM_FILE_URL = "/dmo/file-service/主题域1/local-file/rm";
+
+    /**
+     * 复制文件
+     * */
+    private final static String TEST_CP_FILE_URL = "/dmo/file-service/主题域1/local-file/cp";
+
+    /**
+     * 移动或重命名文件
+     * */
+    private final static String TEST_MV_FILE_URL = "/dmo/file-service/主题域1/local-file/mv";
 
     /**
      * 普通认证的TOKEN
@@ -387,7 +429,7 @@ public class DmoApiImplTest {
 
     /**
      * 高级修改-普通认证
-     * */
+     */
     @Test
     public void testAdvanceEdit2() throws DmoApiSdkException {
         List<UpdateEntity> updateEntities = createUpdateEntities();
@@ -399,7 +441,7 @@ public class DmoApiImplTest {
 
     /**
      * 高级删除-普通认证
-     * */
+     */
     @Test
     public void testAdvanceDelete2() throws DmoApiSdkException {
         List<Map<String, Object>> deleteEntities = createDeleteEntities();
@@ -407,6 +449,103 @@ public class DmoApiImplTest {
                 "mysql-dmo", "ods_test03", deleteEntities, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 文件上传
+     */
+    @Test
+    public void testFileUpload() throws DmoApiSdkException, FileNotFoundException {
+        List<OkHttpCustomClient.UploadInfo> uploadInfos = createUploadInfos();
+        ResponseEntity<Void> res = dmoApi2.fileUpload(TEST_UPLOAD_FILE_URL, "/", false, uploadInfos,
+                DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 单个文件下载
+     */
+    @Test
+    public void testFileDownload() throws DmoApiSdkException, IOException {
+        File file = new File("c:/tmp/public.pgp");
+        try (OutputStream os = new FileOutputStream(file)) {
+            dmoApi2.fileDownload(TEST_DOWNLOAD_FILE_URL, "/public.pgp", os,
+                    DataServiceAuthenticationType.NONE);
+        }
+    }
+
+    /**
+     * 多文件下载
+     */
+    @Test
+    public void testFileDownloads() throws DmoApiSdkException, IOException {
+        File file = new File("c:/tmp/test.zip");
+        try (OutputStream os = new FileOutputStream(file)) {
+            dmoApi2.fileDownloads(TEST_DOWNLOADS_FILE_URL, "/my-test", os,
+                    DataServiceAuthenticationType.NONE);
+        }
+    }
+
+    /**
+     * 获取文件列表
+     */
+    @Test
+    public void testFileLs() throws DmoApiSdkException, IOException {
+        ResponseEntity<List<FileInfo>> res = dmoApi2.fileLs(TEST_LS_FILE_URL, "/", DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getValue());
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 创建文件夹
+     */
+    @Test
+    public void testFileMkdirs() throws DmoApiSdkException, IOException {
+        ResponseEntity<Void> res = dmoApi2.fileMkdirs(TEST_MKDIRS_FILE_URL, "/TEST-CREATE-DIR", DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 删除文件
+     */
+    @Test
+    public void testFileDelete() throws DmoApiSdkException, IOException {
+        ResponseEntity<Void> res = dmoApi2.fileRm(TEST_RM_FILE_URL, "/TEST-CREATE-DIR", DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 复制文件
+     */
+    @Test
+    public void testFileCp() throws DmoApiSdkException, IOException {
+        ResponseEntity<Void> res = dmoApi2.fileCp(TEST_CP_FILE_URL, "/my-test",
+                "/my-test2", DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 移动或重命名文件
+     */
+    @Test
+    public void testFileMv() throws DmoApiSdkException, IOException {
+        ResponseEntity<Void> res = dmoApi2.fileCp(TEST_MV_FILE_URL, "/my-test2",
+                "/my-test3", DataServiceAuthenticationType.NONE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    private static List<OkHttpCustomClient.UploadInfo> createUploadInfos() throws FileNotFoundException {
+        OkHttpCustomClient.UploadInfo<InputStream> uploadInfo = new OkHttpCustomClient.UploadInfo<>();
+        uploadInfo.setFormKey("files");
+        uploadInfo.setData(new FileInputStream("C:\\文档资料\\701\\rocketmq+grpc.docx"));
+        uploadInfo.setFileName("云平台.mp4");
+        return Arrays.asList(uploadInfo);
     }
 
     private static DmoRequest createSearchRequest() {

@@ -5,10 +5,7 @@ import okhttp3.*;
 import okio.BufferedSink;
 
 import javax.net.ssl.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.net.FileNameMap;
 import java.net.URLConnection;
@@ -384,6 +381,27 @@ public class OkHttpCustomClient {
                 FileOutputStream fos = new FileOutputStream(file)
         ) {
             IoUtils.transferTo(is, fos);
+        }
+        return true;
+    }
+
+    /**
+     * @param url       URL请求
+     * @param headerMap header键值对
+     * @param os        输出流
+     * @return boolean
+     * @throws IOException io异常
+     * @date 2018/3/19 10:53
+     */
+    public boolean doDownload(String url, Map<String, String> headerMap,
+                              OutputStream os) throws IOException {
+        Request.Builder requestBuilder = requestBuilderAddHeader(headerMap, url);
+        Request request = requestBuilder.build();
+        Call call = client.newCall(request);
+        try (
+                InputStream is = Objects.requireNonNull(call.execute().body()).byteStream();
+        ) {
+            IoUtils.transferTo(is, os);
         }
         return true;
     }

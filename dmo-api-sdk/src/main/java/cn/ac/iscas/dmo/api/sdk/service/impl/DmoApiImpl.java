@@ -10,9 +10,9 @@ import cn.ac.iscas.dmo.api.sdk.util.CheckUtils;
 import cn.ac.iscas.dmo.api.sdk.util.JsonUtils;
 import cn.ac.iscas.dmo.api.sdk.util.SignApiUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -253,7 +253,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Dic>>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Dic>>>() {
+        });
     }
 
     @Override
@@ -295,7 +296,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Param>>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Param>>>() {
+        });
     }
 
     @Override
@@ -387,6 +389,172 @@ public class DmoApiImpl implements IDmoApi {
         return JsonUtils.fromJson(res, ResponseEntity.class);
     }
 
+    @Override
+    public ResponseEntity<Void> fileUpload(String url, String parentPath, boolean append,
+                                           List<OkHttpCustomClient.UploadInfo> uploadInfos, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (DataServiceAuthenticationType.SIGN == authenticationType) {
+            throw new DmoApiSdkException("文件上传接口暂不支持签名校验方式");
+        }
+        if (parentPath == null) {
+            throw new DmoApiSdkException("parentPath不能为空");
+        }
+        if (uploadInfos == null || uploadInfos.isEmpty()) {
+            throw new DmoApiSdkException("uploadInfos不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        for (OkHttpCustomClient.UploadInfo uploadInfo : uploadInfos) {
+            // 强制将表单的key设置为files
+            uploadInfo.setFormKey("files");
+        }
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("parentPath=" + parentPath);
+        oriParams.add("append=" + append);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "POST", url, "");
+        String res;
+        try {
+            res = httpClient.doUpload(dmoEndpoint + url + oriParamString, header, uploadInfos, new HashMap<>());
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public void fileDownload(String url, String filePath, OutputStream os,
+                             DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (filePath == null) {
+            throw new DmoApiSdkException("filePath不能为空");
+        }
+        if (os == null) {
+            throw new DmoApiSdkException("os不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("filePath=" + filePath);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "GET", url, "");
+        try {
+            httpClient.doDownload(dmoEndpoint + url + oriParamString, header, os);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+    }
+
+    @Override
+    public void fileDownloads(String url, String filePath, OutputStream os, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (filePath == null) {
+            throw new DmoApiSdkException("filePath不能为空");
+        }
+        if (os == null) {
+            throw new DmoApiSdkException("os不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("filePaths=" + filePath);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "GET", url, "");
+        try {
+            httpClient.doDownload(dmoEndpoint + url + oriParamString, header, os);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<FileInfo>> fileLs(String url, String filePath, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (filePath == null) {
+            throw new DmoApiSdkException("filePath不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("filePath=" + filePath);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "GET", url, "");
+        String res;
+        try {
+            res = httpClient.doGet(dmoEndpoint + url + oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<FileInfo>>>() {});
+    }
+
+    @Override
+    public ResponseEntity<Void> fileMkdirs(String url, String dirPath, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (dirPath == null) {
+            throw new DmoApiSdkException("dirPath不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("dirPath=" + dirPath);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "PUT", url, "");
+        String res;
+        try {
+            res = httpClient.doPut(dmoEndpoint + url + oriParamString, header, new HashMap<>());
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Void> fileRm(String url, String filePath, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (filePath == null) {
+            throw new DmoApiSdkException("filePath不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("filePath=" + filePath);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "DELETE", url, "");
+        String res;
+        try {
+            res = httpClient.doDelete(dmoEndpoint + url + oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Void> fileCp(String url, String oriFilePath, String newFilePath, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (oriFilePath == null) {
+            throw new DmoApiSdkException("oriFilePath不能为空");
+        }
+        if (newFilePath == null) {
+            throw new DmoApiSdkException("newFilePath不能为空");
+        }
+
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        List<String> oriParams = new ArrayList<>();
+        oriParams.add("oriFilePath=" + oriFilePath);
+        oriParams.add("newFilePath=" + newFilePath);
+        String oriParamString = "?" + String.join("&", oriParams);
+        Map<String, String> header = createHeader(authenticationType, "POST", url, "");
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + oriParamString, header, new HashMap<>());
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Void> fileMv(String url, String oriFilePath, String newFilePath, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return fileCp(url, oriFilePath, newFilePath, authenticationType);
+    }
+
     private Map<String, String> createHeader(DataServiceAuthenticationType type, String httpMethod,
                                              String url, String body) throws DmoApiSdkException {
         Map<String, String> headers = new HashMap<>();
@@ -414,7 +582,6 @@ public class DmoApiImpl implements IDmoApi {
         }
     }
 
-    @NotNull
     private static AdvanceParam getAdvanceParam(String datasourceName, String tableName) throws DmoApiSdkException {
         List<String> params = new ArrayList<>();
         List<String> oriParams = new ArrayList<>();

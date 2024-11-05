@@ -1,9 +1,12 @@
 package cn.ac.iscas.dmo.api.sdk.service;
 
 import cn.ac.iscas.dmo.api.sdk.exception.DmoApiSdkException;
+import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.model.*;
 import cn.ac.iscas.dmo.api.sdk.model.tdengine.TdEngineSaveRequest;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -201,5 +204,119 @@ public interface IDmoApi {
      * @since jdk1.8
      */
     ResponseEntity<Void> advanceDelete(String url, String datasourceName, String tableName, List<Map<String, Object>> deleteEntities,
-                                     DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+                                       DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 文件上传
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param parentPath         上级路径
+     * @param append             是否为追加模式 true/false
+     * @param uploadInfos        1个或多个文件的上传信息
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> fileUpload(String url, String parentPath,
+                                    boolean append, List<OkHttpCustomClient.UploadInfo> uploadInfos,
+                                    DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 单个文件下载接口,只能下载文件，不可下载文件夹
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param filePath           文件路径
+     * @param os                 输出流，将下载的文件通过此流输出
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    void fileDownload(String url, String filePath, OutputStream os,
+                      DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 多个文件下载接口,支持文件夹和文件混合下载，给定上级路径，会级联下载,打成一个ZIP
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param filePath           文件路径
+     * @param os                 输出流，将下载的文件通过此流输出
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    void fileDownloads(String url, String filePath, OutputStream os,
+                       DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+
+    /**
+     * 获取某个路径中的文件列表
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param filePath           文件路径
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    ResponseEntity<List<FileInfo>> fileLs(String url, String filePath,
+                                          DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 新建文件夹
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param dirPath            文件夹路径
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> fileMkdirs(String url, String dirPath,
+                                    DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+
+    /**
+     * 删除文件
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param filePath           文件路径
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> fileRm(String url, String filePath,
+                                DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 复制文件
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param oriFilePath        原始文件路径
+     * @param newFilePath        目标文件路径
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> fileCp(String url, String oriFilePath, String newFilePath,
+                                DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 移动或重命名文件
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param oriFilePath        原始文件路径
+     * @param newFilePath        目标文件路径
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/5
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> fileMv(String url, String oriFilePath, String newFilePath,
+                                DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
 }
