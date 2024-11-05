@@ -10,6 +10,7 @@ import cn.ac.iscas.dmo.api.sdk.util.CheckUtils;
 import cn.ac.iscas.dmo.api.sdk.util.JsonUtils;
 import cn.ac.iscas.dmo.api.sdk.util.SignApiUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -297,6 +298,95 @@ public class DmoApiImpl implements IDmoApi {
         return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Param>>>() {});
     }
 
+    @Override
+    public ResponseEntity<SearchResult> advanceSearch(String url, String datasourceName, String tableName, DmoRequest request, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        if (request == null) {
+            request = new DmoRequest();
+            request.setPageNumber(1);
+            request.setPageSize(10);
+        }
+        String jsonBody = JsonUtils.toJson(request);
+
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<SearchResult>>() {
+        });
+    }
+
+
+    @Override
+    public ResponseEntity<Void> advanceAdd(String url, String datasourceName, String tableName,
+                                           List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        String jsonBody = JsonUtils.toJson(items);
+
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Void> tdEngineAdd(String url, String datasourceName, String tableName, List<TdEngineSaveRequest> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = JsonUtils.toJson(items);
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Void> advanceEdit(String url, String datasourceName, String tableName, List<UpdateEntity> updateEntities, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = JsonUtils.toJson(updateEntities);
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+        Map<String, String> header = createHeader(authenticationType, "PUT", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPut(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Void> advanceDelete(String url, String datasourceName, String tableName,
+                                              List<Map<String, Object>> deleteEntities,
+                                              DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = JsonUtils.toJson(deleteEntities);
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+        Map<String, String> header = createHeader(authenticationType, "PUT", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPut(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
     private Map<String, String> createHeader(DataServiceAuthenticationType type, String httpMethod,
                                              String url, String body) throws DmoApiSdkException {
         Map<String, String> headers = new HashMap<>();
@@ -314,6 +404,40 @@ public class DmoApiImpl implements IDmoApi {
         return headers;
     }
 
+    private static class AdvanceParam {
+        public final String paramString;
+        public final String oriParamString;
+
+        public AdvanceParam(String paramString, String oriParamString) {
+            this.paramString = paramString;
+            this.oriParamString = oriParamString;
+        }
+    }
+
+    @NotNull
+    private static AdvanceParam getAdvanceParam(String datasourceName, String tableName) throws DmoApiSdkException {
+        List<String> params = new ArrayList<>();
+        List<String> oriParams = new ArrayList<>();
+        try {
+            if (datasourceName != null) {
+                params.add("datasourceName=" + URLEncoder.encode(datasourceName, "UTF-8").replace("+", "%20"));
+                oriParams.add("datasourceName=" + datasourceName);
+            }
+            if (tableName != null) {
+                params.add("tableName=" + URLEncoder.encode(tableName, "UTF-8").replace("+", "%20"));
+                oriParams.add("tableName=" + tableName);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
+        }
+        String paramString = "";
+        String oriParamString = "";
+        if (!params.isEmpty()) {
+            paramString = "?" + String.join("&", params);
+            oriParamString = "?" + String.join("&", oriParams);
+        }
+        return new AdvanceParam(paramString, oriParamString);
+    }
 
     public String getToken() {
         return token;

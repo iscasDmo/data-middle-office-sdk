@@ -62,6 +62,26 @@ public class DmoApiImplTest {
     private final static String TEST_PARAM_SEARCH_URL = "/dmo/param-service/search";
 
     /**
+     * 高级查询的URL - 拷贝自数据中台
+     */
+    private final static String TEST_ADVANCE_SEARCH_URL = "/dmo/data-service/advance_select";
+
+    /**
+     * 高级新增的URL - 拷贝自数据中台
+     */
+    private final static String TEST_ADVANCE_ADD_URL = "/dmo/data-service/advance_insert";
+
+    /**
+     * 高级修改的URL - 拷贝自数据中台
+     */
+    private final static String TEST_ADVANCE_EDIT_URL = "/dmo/data-service/advance_update";
+
+    /**
+     * 高级删除的URL - 拷贝自数据中台
+     */
+    private final static String TEST_ADVANCE_DELETE_URL = "/dmo/data-service/advance_delete";
+
+    /**
      * 普通认证的TOKEN
      */
     private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzEyOTAzMDE4LCJle" +
@@ -336,6 +356,55 @@ public class DmoApiImplTest {
     @Test
     public void testParam1() throws DmoApiSdkException {
         ResponseEntity<List<Param>> res = dmoApi1.searchParam(TEST_PARAM_SEARCH_URL, null, "sys.super.user.default.pwd", null);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级查询-普通认证
+     */
+    @Test
+    public void testAdvanceSearch2() throws DmoApiSdkException {
+        DmoRequest request = createSearchRequest();
+        ResponseEntity<SearchResult> res = dmoApi2.advanceSearch(TEST_ADVANCE_SEARCH_URL,
+                "mysql-dmo", "ods_test03", request, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getValue());
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级新增-普通认证
+     */
+    @Test
+    public void testAdvanceAdd2() throws DmoApiSdkException {
+        List<Map<String, Object>> addItems = createAddItems();
+        ResponseEntity<Void> res = dmoApi2.advanceAdd(TEST_ADVANCE_ADD_URL,
+                "mysql-dmo", "ods_test03", addItems, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级修改-普通认证
+     * */
+    @Test
+    public void testAdvanceEdit2() throws DmoApiSdkException {
+        List<UpdateEntity> updateEntities = createUpdateEntities();
+        ResponseEntity<Void> res = dmoApi2.advanceEdit(TEST_ADVANCE_EDIT_URL,
+                "mysql-dmo", "ods_test03", updateEntities, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级删除-普通认证
+     * */
+    @Test
+    public void testAdvanceDelete2() throws DmoApiSdkException {
+        List<Map<String, Object>> deleteEntities = createDeleteEntities();
+        ResponseEntity<Void> res = dmoApi2.advanceDelete(TEST_ADVANCE_DELETE_URL,
+                "mysql-dmo", "ods_test03", deleteEntities, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
