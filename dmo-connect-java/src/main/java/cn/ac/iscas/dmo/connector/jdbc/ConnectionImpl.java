@@ -2,18 +2,21 @@ package cn.ac.iscas.dmo.connector.jdbc;
 
 import cn.ac.iscas.dmo.connector.Constants;
 import cn.ac.iscas.dmo.connector.conf.HostInfo;
+import cn.ac.iscas.dmo.connector.exception.DmoConnectionException;
 import cn.ac.iscas.dmo.connector.util.Base64Utils;
 import cn.ac.iscas.dmo.db.rpc.GrpcUtils;
+
+import cn.ac.iscas.dmo.db.rpc.execute.ConnectionRequest;
+import cn.ac.iscas.dmo.db.rpc.execute.ConnectionResponse;
 import cn.ac.iscas.dmo.db.rpc.execute.StreamServiceGrpc;
 
 import java.sql.*;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
- *  数据中台jdbc连接的实现类
+ * 数据中台jdbc连接的实现类
  *
  * @author zhuquanwen
  * @version 1.0
@@ -35,88 +38,42 @@ public class ConnectionImpl implements Connection, Constants {
 
     /**
      * 默认结果集类型
-     * */
+     */
     private static final int DEFAULT_RESULT_SET_TYPE = ResultSet.TYPE_FORWARD_ONLY;
 
     private static final int DEFAULT_RESULT_SET_CONCURRENCY = ResultSet.CONCUR_READ_ONLY;
 
     public ConnectionImpl(HostInfo hostInfo) throws SQLException {
         this.origHostInfo = hostInfo;
-        // 获取中台的一些信息
-//        createDmoUrl(hostInfo);
         createDmoInfo(hostInfo);
         // 初始化grpc
         initGrpc();
-        // 获取dbType
-//        this.dbType = initDbType();
+        // 校验用户名密码
+        checkUser();
+    }
+
+    private void checkUser() throws DmoConnectionException {
+        ConnectionRequest connectionRequest = ConnectionRequest.newBuilder()
+                .setDatasourceName(datasourceName)
+                .setDatasourceType(datasourceType)
+                .setUsername(origHostInfo.getUsername() == null ? "" : origHostInfo.getUsername())
+                .setPassword(origHostInfo.getPassword() == null ? "" : origHostInfo.getPassword())
+                .build();
+        ConnectionResponse connectionResponse = stub.connect(connectionRequest);
+        int status = connectionResponse.getStatus();
+        String message = connectionResponse.getMessage();
+        this.token = connectionResponse.getToken();
+        if (status < 200 || status >= 300) {
+            throw new DmoConnectionException("连接数据中台失败:" + message);
+        }
     }
 
     private void initGrpc() {
         stub = GrpcUtils.getStub(origHostInfo.getHost(), origHostInfo.getPort());
     }
 
-//    private String initDbType() throws SQLException {
-//
-//        String protocol = "https://";
-//        if ("false".equals(useSsl)) {
-//            protocol = "http://";
-//        }
-//
-//        String getDbTypeUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + "/dmo/data-service/dbType?url=" + sqlServiceUrl;
-//
-//        Response response = null;
-//        try {
-//            response = httpClient.doGetWithRes(getDbTypeUrl, new HashMap<>());
-//        } catch (IOException e) {
-//            throw new SQLException("获取数据源类型出错", e);
-//        }
-//        int code = response.code();
-//        String resStr;
-//        try {
-//            resStr = response.body().string();
-//        } catch (IOException e) {
-//            throw new SQLException(e.getMessage(), e);
-//        }
-//        if (code != 200) {
-//            throw new SQLException("获取数据源类型出错:" + resStr);
-//        }
-//        Map<String, Object> map = JsonUtils.fromJson(resStr, new TypeReference<Map<String, Object>>() {
-//        });
-//        return (String) map.get("value");
-//    }
-
-//    private String initDbType() throws SQLException {
-//
-//        String protocol = "https://";
-//        if ("false".equals(useSsl)) {
-//            protocol = "http://";
-//        }
-//
-//        String getDbTypeUrl = protocol + origHostInfo.getHost() + ":" + origHostInfo.getPort() + "/dmo/data-service/dbType?url=" + sqlServiceUrl;
-//
-//        Response response = null;
-//        try {
-//            response = httpClient.doGetWithRes(getDbTypeUrl, new HashMap<>());
-//        } catch (IOException e) {
-//            throw new SQLException("获取数据源类型出错", e);
-//        }
-//        int code = response.code();
-//        String resStr;
-//        try {
-//            resStr = response.body().string();
-//        } catch (IOException e) {
-//            throw new SQLException(e.getMessage(), e);
-//        }
-//        if (code != 200) {
-//            throw new SQLException("获取数据源类型出错:" + resStr);
-//        }
-//        Map<String, Object> map = JsonUtils.fromJson(resStr, new TypeReference<Map<String, Object>>() {
-//        });
-//        return (String) map.get("value");
-//    }
-
-    public static ConnectionImpl getInstance(HostInfo hostInfo) throws SQLException {
-        // 获取链接实例
+    public static ConnectionImpl getInstance(HostInfo hostInfo) throws SQLException, DmoConnectionException {
+        // 获取连接实例
         return new ConnectionImpl(hostInfo);
     }
 
@@ -411,7 +368,7 @@ public class ConnectionImpl implements Connection, Constants {
         if (tmpDsName == null) {
             throw new SQLException("连接URL中datasourceName为空");
         }
-        datasourceName =  Base64Utils.decodeToStr(tmpDsName);
+        datasourceName = Base64Utils.decodeToStr(tmpDsName);
     }
 
     public String getToken() {
@@ -441,7 +398,6 @@ public class ConnectionImpl implements Connection, Constants {
     public void setDatasourceType(String datasourceType) {
         this.datasourceType = datasourceType;
     }
-
 
     public StreamServiceGrpc.StreamServiceBlockingStub getStub() {
         return stub;

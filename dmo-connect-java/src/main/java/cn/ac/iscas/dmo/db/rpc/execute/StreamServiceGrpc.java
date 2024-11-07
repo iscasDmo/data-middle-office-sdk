@@ -49,6 +49,37 @@ public final class StreamServiceGrpc {
     return getExecuteMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<ConnectionRequest,
+      ConnectionResponse> getConnectMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "connect",
+      requestType = ConnectionRequest.class,
+      responseType = ConnectionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<ConnectionRequest,
+      ConnectionResponse> getConnectMethod() {
+    io.grpc.MethodDescriptor<ConnectionRequest, ConnectionResponse> getConnectMethod;
+    if ((getConnectMethod = StreamServiceGrpc.getConnectMethod) == null) {
+      synchronized (StreamServiceGrpc.class) {
+        if ((getConnectMethod = StreamServiceGrpc.getConnectMethod) == null) {
+          StreamServiceGrpc.getConnectMethod = getConnectMethod =
+              io.grpc.MethodDescriptor.<ConnectionRequest, ConnectionResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "connect"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  ConnectionRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  ConnectionResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StreamServiceMethodDescriptorSupplier("connect"))
+              .build();
+        }
+      }
+    }
+    return getConnectMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -106,6 +137,13 @@ public final class StreamServiceGrpc {
                          io.grpc.stub.StreamObserver<ExecuteResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getExecuteMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void connect(ConnectionRequest request,
+                         io.grpc.stub.StreamObserver<ConnectionResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getConnectMethod(), responseObserver);
+    }
   }
 
   /**
@@ -148,6 +186,14 @@ public final class StreamServiceGrpc {
       io.grpc.stub.ClientCalls.asyncServerStreamingCall(
           getChannel().newCall(getExecuteMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void connect(ConnectionRequest request,
+                        io.grpc.stub.StreamObserver<ConnectionResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getConnectMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -176,6 +222,13 @@ public final class StreamServiceGrpc {
       return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getExecuteMethod(), getCallOptions(), request);
     }
+
+    /**
+     */
+    public ConnectionResponse connect(ConnectionRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getConnectMethod(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -196,9 +249,18 @@ public final class StreamServiceGrpc {
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new StreamServiceFutureStub(channel, callOptions);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<ConnectionResponse> connect(
+        ConnectionRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getConnectMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_EXECUTE = 0;
+  private static final int METHODID_CONNECT = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -220,6 +282,10 @@ public final class StreamServiceGrpc {
         case METHODID_EXECUTE:
           serviceImpl.execute((ExecuteRequest) request,
               (io.grpc.stub.StreamObserver<ExecuteResponse>) responseObserver);
+          break;
+        case METHODID_CONNECT:
+          serviceImpl.connect((ConnectionRequest) request,
+              (io.grpc.stub.StreamObserver<ConnectionResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -246,6 +312,13 @@ public final class StreamServiceGrpc {
               ExecuteRequest,
               ExecuteResponse>(
                 service, METHODID_EXECUTE)))
+        .addMethod(
+          getConnectMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              ConnectionRequest,
+              ConnectionResponse>(
+                service, METHODID_CONNECT)))
         .build();
   }
 
@@ -295,6 +368,7 @@ public final class StreamServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new StreamServiceFileDescriptorSupplier())
               .addMethod(getExecuteMethod())
+              .addMethod(getConnectMethod())
               .build();
         }
       }

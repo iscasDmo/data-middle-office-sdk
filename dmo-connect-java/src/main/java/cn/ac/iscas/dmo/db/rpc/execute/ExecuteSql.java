@@ -25,6 +25,16 @@ public final class ExecuteSql {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cn_ac_iscas_dmo_db_rpc_stream_ExecuteResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -39,11 +49,18 @@ public final class ExecuteSql {
       "eType\030\001 \001(\t\022\026\n\016datasourceName\030\002 \001(\t\022\013\n\003s" +
       "ql\030\003 \001(\t\022\r\n\005token\030\004 \001(\t\">\n\017ExecuteRespon" +
       "se\022\016\n\006status\030\001 \001(\005\022\014\n\004data\030\002 \001(\014\022\r\n\005erro" +
-      "r\030\003 \001(\t2}\n\rStreamService\022l\n\007execute\022-.cn" +
-      ".ac.iscas.dmo.db.rpc.stream.ExecuteReque" +
-      "st\032..cn.ac.iscas.dmo.db.rpc.stream.Execu" +
-      "teResponse\"\0000\001B.\n\036cn.ac.iscas.dmo.db.rpc" +
-      ".executeB\nExecuteSqlP\001b\006proto3"
+      "r\030\003 \001(\t\"g\n\021ConnectionRequest\022\026\n\016datasour" +
+      "ceType\030\001 \001(\t\022\026\n\016datasourceName\030\002 \001(\t\022\020\n\010" +
+      "username\030\003 \001(\t\022\020\n\010password\030\004 \001(\t\"D\n\022Conn" +
+      "ectionResponse\022\016\n\006status\030\001 \001(\005\022\017\n\007messag" +
+      "e\030\002 \001(\t\022\r\n\005token\030\003 \001(\t2\357\001\n\rStreamService" +
+      "\022l\n\007execute\022-.cn.ac.iscas.dmo.db.rpc.str" +
+      "eam.ExecuteRequest\032..cn.ac.iscas.dmo.db." +
+      "rpc.stream.ExecuteResponse\"\0000\001\022p\n\007connec" +
+      "t\0220.cn.ac.iscas.dmo.db.rpc.stream.Connec" +
+      "tionRequest\0321.cn.ac.iscas.dmo.db.rpc.str" +
+      "eam.ConnectionResponse\"\000B.\n\036cn.ac.iscas." +
+      "dmo.db.rpc.executeB\nExecuteSqlP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -61,6 +78,18 @@ public final class ExecuteSql {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cn_ac_iscas_dmo_db_rpc_stream_ExecuteResponse_descriptor,
         new String[] { "Status", "Data", "Error", });
+    internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionRequest_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionRequest_descriptor,
+        new String[] { "DatasourceType", "DatasourceName", "Username", "Password", });
+    internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionResponse_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cn_ac_iscas_dmo_db_rpc_stream_ConnectionResponse_descriptor,
+        new String[] { "Status", "Message", "Token", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

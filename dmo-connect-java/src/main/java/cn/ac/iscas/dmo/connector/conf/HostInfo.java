@@ -23,6 +23,8 @@ public class HostInfo {
     private final String datasourceType;
     private final String datasourceName;
     private final String url;
+    private String username;
+    private String password;
 
     public HostInfo(String url, String host, int port, String datasourceType, String datasourceName,
                     String token, Properties properties) {
@@ -34,7 +36,14 @@ public class HostInfo {
         this.datasourceName = datasourceName;
         if (Objects.nonNull(properties)) {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                this.hostProperties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                this.hostProperties.put(String.valueOf(key), String.valueOf(value));
+                if (Objects.equals("user", key)) {
+                    username = (String) value;
+                } else if (Objects.equals("password", key)) {
+                    password = (String) value;
+                }
             }
         }
     }
@@ -95,5 +104,13 @@ public class HostInfo {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }
