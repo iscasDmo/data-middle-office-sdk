@@ -4,6 +4,7 @@ import cn.ac.iscas.dmo.api.sdk.exception.DmoApiSdkException;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpProps;
 import cn.ac.iscas.dmo.api.sdk.model.*;
+import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
 import cn.ac.iscas.dmo.api.sdk.model.tdengine.TdEngineSaveRequest;
 import cn.ac.iscas.dmo.api.sdk.service.IDmoApi;
 import cn.ac.iscas.dmo.api.sdk.util.CheckUtils;
@@ -390,8 +391,76 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Map<String, Object>> dataViewSearch(String url, GeneralQueryRequest request, String fileName, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = JsonUtils.toJson(request);
+        AdvanceParam advanceParam = getAdvanceParam(Collections.singletonList("fileName"), Collections.singletonList(fileName));
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Map<String, Object>>>() {});
+    }
+
+    @Override
+    public ResponseEntity<List<TableRelationVO>> tableRelationSelect(String url, String datasourceName, String tableName,
+                                                                     DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
+        String res;
+        try {
+            String tableRelationSelectUrl = dmoEndpoint + url + advanceParam.oriParamString;
+            res = httpClient.doGet(tableRelationSelectUrl, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<TableRelationVO>>>(){});
+    }
+
+    @Override
+    public ResponseEntity<SearchResult> linkDataSelect(String url, LinkDataRequest linkDataRequest, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        String jsonBody = JsonUtils.toJson(linkDataRequest);
+        Map<String, String> header = createHeader(authenticationType, "POST", url, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<SearchResult>>(){});
+    }
+
+    @Override
+    public void advanceFileDownload(String url, String datasourceName, String filePath,
+                                                                     OutputStream os, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        if (datasourceName == null) {
+            throw new DmoApiSdkException("datasourceName不能为空");
+        }
+        if (filePath == null) {
+            throw new DmoApiSdkException("filePath不能为空");
+        }
+        if (os == null) {
+            throw new DmoApiSdkException("os不能为空");
+        }
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "filePath"), Arrays.asList(datasourceName, filePath));
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
+        try {
+            httpClient.doDownload(dmoEndpoint + url + advanceParam.oriParamString, header, os);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+    }
+
+    @Override
     public ResponseEntity<Void> fileUpload(String url, String parentPath, boolean append,
-                                           List<OkHttpCustomClient.UploadInfo> uploadInfos, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+                                           List<OkHttpCustomClient.UploadInfo> uploadInfos,
+                                           DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         if (DataServiceAuthenticationType.SIGN == authenticationType) {
             throw new DmoApiSdkException("文件上传接口暂不支持签名校验方式");
         }
@@ -407,15 +476,12 @@ public class DmoApiImpl implements IDmoApi {
             // 强制将表单的key设置为files
             uploadInfo.setFormKey("files");
         }
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("parentPath=" + parentPath);
-        oriParams.add("append=" + append);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "POST", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("parentPath", "append"),
+                Arrays.asList(parentPath, String.valueOf(append)));
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, "");
         String res;
         try {
-            res = httpClient.doUpload(dmoEndpoint + url + oriParamString, header, uploadInfos, new HashMap<>());
+            res = httpClient.doUpload(dmoEndpoint + url + advanceParam.oriParamString, header, uploadInfos, new HashMap<>());
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -432,13 +498,10 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException("os不能为空");
         }
         CheckUtils.checkAuthorizationType(authenticationType, this);
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("filePath=" + filePath);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "GET", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Collections.singletonList("filePath"), Collections.singletonList(filePath));
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
         try {
-            httpClient.doDownload(dmoEndpoint + url + oriParamString, header, os);
+            httpClient.doDownload(dmoEndpoint + url + advanceParam.oriParamString, header, os);
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -453,13 +516,10 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException("os不能为空");
         }
         CheckUtils.checkAuthorizationType(authenticationType, this);
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("filePaths=" + filePath);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "GET", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Collections.singletonList("filePaths"), Collections.singletonList(filePath));
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
         try {
-            httpClient.doDownload(dmoEndpoint + url + oriParamString, header, os);
+            httpClient.doDownload(dmoEndpoint + url + advanceParam.oriParamString, header, os);
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -471,14 +531,11 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException("filePath不能为空");
         }
         CheckUtils.checkAuthorizationType(authenticationType, this);
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("filePath=" + filePath);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "GET", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Collections.singletonList("filePath"), Collections.singletonList(filePath));
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
         String res;
         try {
-            res = httpClient.doGet(dmoEndpoint + url + oriParamString, header);
+            res = httpClient.doGet(dmoEndpoint + url + advanceParam.oriParamString, header);
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -491,14 +548,11 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException("dirPath不能为空");
         }
         CheckUtils.checkAuthorizationType(authenticationType, this);
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("dirPath=" + dirPath);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "PUT", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Collections.singletonList("dirPath"), Collections.singletonList(dirPath));
+        Map<String, String> header = createHeader(authenticationType, "PUT", url + advanceParam.paramString, "");
         String res;
         try {
-            res = httpClient.doPut(dmoEndpoint + url + oriParamString, header, new HashMap<>());
+            res = httpClient.doPut(dmoEndpoint + url + advanceParam.oriParamString, header, new HashMap<>());
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -511,14 +565,11 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException("filePath不能为空");
         }
         CheckUtils.checkAuthorizationType(authenticationType, this);
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("filePath=" + filePath);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "DELETE", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Collections.singletonList("filePath"), Collections.singletonList(filePath));
+        Map<String, String> header = createHeader(authenticationType, "DELETE", url + advanceParam.paramString, "");
         String res;
         try {
-            res = httpClient.doDelete(dmoEndpoint + url + oriParamString, header);
+            res = httpClient.doDelete(dmoEndpoint + url + advanceParam.oriParamString, header);
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -535,15 +586,11 @@ public class DmoApiImpl implements IDmoApi {
         }
 
         CheckUtils.checkAuthorizationType(authenticationType, this);
-
-        List<String> oriParams = new ArrayList<>();
-        oriParams.add("oriFilePath=" + oriFilePath);
-        oriParams.add("newFilePath=" + newFilePath);
-        String oriParamString = "?" + String.join("&", oriParams);
-        Map<String, String> header = createHeader(authenticationType, "POST", url, "");
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("oriFilePath", "newFilePath"), Arrays.asList(oriFilePath, newFilePath));
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, "");
         String res;
         try {
-            res = httpClient.doPost(dmoEndpoint + url + oriParamString, header, new HashMap<>());
+            res = httpClient.doPost(dmoEndpoint + url + advanceParam.oriParamString, header, new HashMap<>());
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -605,6 +652,29 @@ public class DmoApiImpl implements IDmoApi {
         }
         return new AdvanceParam(paramString, oriParamString);
     }
+
+    private static AdvanceParam getAdvanceParam(List<String> keys, List<String> values) throws DmoApiSdkException {
+        List<String> params = new ArrayList<>();
+        List<String> oriParams = new ArrayList<>();
+        try {
+            for (int i = 0; i < keys.size(); i++) {
+                String key = keys.get(i);
+                String value = values.get(i);
+                params.add(key + "=" + URLEncoder.encode(value, "UTF-8").replace("+", "%20"));
+                oriParams.add(key + "=" + value);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
+        }
+        String paramString = "";
+        String oriParamString = "";
+        if (!params.isEmpty()) {
+            paramString = "?" + String.join("&", params);
+            oriParamString = "?" + String.join("&", oriParams);
+        }
+        return new AdvanceParam(paramString, oriParamString);
+    }
+
 
     public String getToken() {
         return token;

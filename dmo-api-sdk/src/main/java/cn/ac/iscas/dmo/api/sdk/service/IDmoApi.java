@@ -3,6 +3,7 @@ package cn.ac.iscas.dmo.api.sdk.service;
 import cn.ac.iscas.dmo.api.sdk.exception.DmoApiSdkException;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.model.*;
+import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
 import cn.ac.iscas.dmo.api.sdk.model.tdengine.TdEngineSaveRequest;
 
 import java.io.InputStream;
@@ -205,6 +206,63 @@ public interface IDmoApi {
      */
     ResponseEntity<Void> advanceDelete(String url, String datasourceName, String tableName, List<Map<String, Object>> deleteEntities,
                                        DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 数据视图查询
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param request           配置
+     * @param fileName          数据视图配置文件名
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/05
+     * @since jdk1.8
+     */
+    ResponseEntity<Map<String, Object>> dataViewSearch(String url, GeneralQueryRequest request, String fileName,
+                                                       DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+
+    /**
+     * 获取某个标的关联关系
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName     数据源名
+     * @param tableName          表名
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2025/1/20
+     * @since jdk1.8
+     */
+    ResponseEntity<List<TableRelationVO>> tableRelationSelect(String url, String datasourceName, String tableName,
+                                                              DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 关联数据查询
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param linkDataRequest    关联数据查询条件
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/11/05
+     * @since jdk1.8
+     */
+    ResponseEntity<SearchResult> linkDataSelect(String url, LinkDataRequest linkDataRequest,
+                                                       DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 高级文件下载
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName     数据源名
+     * @param filePath          文件路径
+     * @param os          文件下载的输出流
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2025/1/20
+     * @since jdk1.8
+     */
+    void advanceFileDownload(String url, String datasourceName, String filePath, OutputStream os,
+                             DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
     /**
      * 文件上传

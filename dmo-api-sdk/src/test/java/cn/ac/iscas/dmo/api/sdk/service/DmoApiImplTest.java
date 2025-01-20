@@ -4,6 +4,7 @@ import cn.ac.iscas.dmo.api.sdk.exception.DmoApiSdkException;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpProps;
 import cn.ac.iscas.dmo.api.sdk.model.*;
+import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
 import cn.ac.iscas.dmo.api.sdk.service.impl.DmoApiImpl;
 import org.junit.Assert;
 import org.junit.Before;
@@ -79,6 +80,16 @@ public class DmoApiImplTest {
     private final static String TEST_ADVANCE_EDIT_URL = "/dmo/data-service/advance_update";
 
     /**
+     * 数据视图查询 - 拷贝自数据中台
+     */
+    private final static String TEST_DATA_VIEW_SEARCH_URL = "/dmo/data-service/data_view_search";
+
+    /**
+     * 关联数据查询 - 拷贝自数据中台
+     */
+    private final static String TEST_RELATION_DATA_SEARCH_URL = "/dmo/data-service/link_data_select";
+
+    /**
      * 高级删除的URL - 拷贝自数据中台
      */
     private final static String TEST_ADVANCE_DELETE_URL = "/dmo/data-service/advance_delete";
@@ -92,6 +103,12 @@ public class DmoApiImplTest {
      * 单个文件下载
      * */
     private final static String TEST_DOWNLOAD_FILE_URL = "/dmo/file-service/主题域1/local-file/download";
+
+
+    /**
+     * 高级文件下载
+     * */
+    private final static String TEST_ADVANCE_DOWNLOAD_FILE_URL = "/dmo/file-service/advance_download";
 
     /**
      * 多文件下载
@@ -124,11 +141,21 @@ public class DmoApiImplTest {
     private final static String TEST_MV_FILE_URL = "/dmo/file-service/主题域1/local-file/mv";
 
     /**
+     * 移动或重命名文件
+     * */
+    private final static String TEST_TABLE_RELATION_SELECT_URL = "/dmo/data-service/table_relation_select";
+
+    /**
      * 普通认证的TOKEN
      */
-    private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzEyOTAzMDE4LCJle" +
-            "HAiOjE4MzUyNDgzMzQsImlhdCI6MTcxMjkwMzAxOCwicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9" +
-            ".IBkQMAzdpgFZj313q5yDs6JzrMRvIpTMV2OLVFtwFuw";
+    private final static String TOKEN = "eyJraWQiOiJkYXRhLW1pZGRsZS1vZmZpY2UiLCJhbGciOiJSUzI1NiJ9." +
+            "eyJzdWIiOiJhZG1pbiIsImF1ZCI6ImdvdmVybmFuY2UiLCJuYmYiOjE3MzY5MjgzOTEsInNjb3BlIjpbImFsbCJdLCJpc3" +
+            "MiOiJodHRwOi8vMTkyLjE2OC41MC40OTo4NjU0L3VhYSIsImV4cCI6MTczOTUyMDM5MSwiaWF0IjoxNzM2OTI4MzkxLCJqd" +
+            "GkiOiIwNTk1OGU2MS1mZGVkLTQyMjEtYTM4OC04ODM2YmMwYjdkZGUiLCJhdXRob3JpdGllcyI6WyJhbGwiLCJTVVBFUiJd" +
+            "fQ.KCotzzCq56Zf2Q-AHtLgo1YsNLVuJrNZTIm1f6diiJMTuEdgOB75dIkw8R36Hr093IUVxksEs-taQ54a1VwM1i1Hgfmi" +
+            "0yBrl9dC1h4Fa5NzOhqcMZj-GGaahHwuIM-XEoEPco1JZpEs9Sirv7gLgKtD5mjVHG38ZgMQ0Yi8Z2Xp53sx-TqM1eijZo" +
+            "cN0IOfxYjEtFr-FQcUl_VMYVluWumNfOWoYHvV-9Yy1-RczU9fjZL1S4kZRBmnuC804S7BYbTWStEG4HlN4Xfx7twge-8f" +
+            "Nt1899Qh-EuZhESJ4EPqW7GgCzg1uo4DfmQynbgc0kUSH-Z4ei89a6mEDjr8Hw";
 
     /**
      * 签名模式的appId
@@ -488,6 +515,62 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 高级文件下载
+     */
+    @Test
+    public void testAdvanceFileDownload() throws DmoApiSdkException, IOException {
+        File file = new File("c:/tmp/test.avi");
+        try (OutputStream os = new FileOutputStream(file)) {
+            dmoApi2.advanceFileDownload(TEST_ADVANCE_DOWNLOAD_FILE_URL, "local-file", "/视频/test.avi", os,
+                    DataServiceAuthenticationType.SIMPLE);
+        }
+    }
+
+    /**
+     * 数据视图查询
+     */
+    @Test
+    public void testDataViewSearch() throws DmoApiSdkException, IOException {
+        GeneralQueryRequest req = new GeneralQueryRequest.GeneralQueryRequestBuilder()
+                .pageNumber(1).pageSize(10).build();
+        ResponseEntity<Map<String, Object>> res = dmoApi2.dataViewSearch(TEST_DATA_VIEW_SEARCH_URL, req,
+                "data_view_template_simple.xml",
+                DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 关联数据查询
+     */
+    @Test
+    public void testLinkDataSearch() throws DmoApiSdkException, IOException {
+        TableRelationVO tableRelationVO = new TableRelationVO();
+        tableRelationVO.setTable("ods_TEST_PARENT");
+        tableRelationVO.setTargetTable("ods_TEST_CHILD");
+        tableRelationVO.setMiddleTableRelation(true);
+        tableRelationVO.setMiddleTable("ods_TEST_MIDDLE");
+        tableRelationVO.setCols(Collections.singletonList("ID"));
+        tableRelationVO.setTargetCols(Collections.singletonList("ID"));
+        tableRelationVO.setMiddleCols(Collections.singletonList("PID"));
+        tableRelationVO.setTargetMiddleCols(Collections.singletonList("CID"));
+        LinkDataRequest linkDataRequest = new LinkDataRequest.LinkDataRequestBuilder()
+                .request(new DmoRequest.DmoRequestBuilder().page(1, 10).build())
+                .datasourceName("161-dm-DMO")
+                .item(new HashMap<String, Object>() {{
+                    put("ID", 1);
+                    put("NAME", "李四");
+                }})
+                .relation(tableRelationVO)
+                .build();
+        ResponseEntity<SearchResult> res = dmoApi2.linkDataSelect(TEST_RELATION_DATA_SEARCH_URL,
+                linkDataRequest, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+
+    /**
      * 获取文件列表
      */
     @Test
@@ -540,6 +623,19 @@ public class DmoApiImplTest {
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
 
+    /**
+     * 获取表关系
+     */
+    @Test
+    public void testTableRelationSelect() throws DmoApiSdkException, IOException {
+        ResponseEntity<List<TableRelationVO>> relations = dmoApi2.tableRelationSelect(TEST_TABLE_RELATION_SELECT_URL,
+                "161-dm-DMO",
+                "ods_TEST_PARENT",
+                DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(relations);
+        Assert.assertEquals(relations.getStatus().longValue(), 200L);
+    }
+
     private static List<OkHttpCustomClient.UploadInfo> createUploadInfos() throws FileNotFoundException {
         OkHttpCustomClient.UploadInfo<InputStream> uploadInfo = new OkHttpCustomClient.UploadInfo<>();
         uploadInfo.setFormKey("files");
@@ -568,7 +664,6 @@ public class DmoApiImplTest {
         request.setPageSize(10);
         return request;
     }
-
 
     private static List<Map<String, Object>> createAddItems() {
         Map<String, Object> item1 = new HashMap<>();

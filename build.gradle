@@ -203,7 +203,7 @@ subprojects {
     }
 
     //javadoc，如果用jdk11，默认就支持中文
-//查看可以配置的属性：https://docs.gradle.org/current/javadoc/org/gradle/external/javadoc/StandardJavadocDocletOptions.html
+    //查看可以配置的属性：https://docs.gradle.org/current/javadoc/org/gradle/external/javadoc/StandardJavadocDocletOptions.html
     tasks.withType(Javadoc) {
         options.version = true
         options.author = true

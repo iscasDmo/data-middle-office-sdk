@@ -1,6 +1,5 @@
 package cn.ac.iscas.dmo.api.sdk.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +47,9 @@ public class DmoRequest {
      * 显示的列
      */
     private Set<String> showColumns;
+
+    /**是否返回文件*/
+    private Boolean withFile = false;
 
     public static DmoRequestBuilder builder() {
         return new DmoRequestBuilder();
@@ -179,5 +181,13 @@ public class DmoRequest {
 
     public void setShowColumns(Set<String> showColumns) {
         this.showColumns = showColumns;
+    }
+
+    public Boolean getWithFile() {
+        return withFile;
+    }
+
+    public void setWithFile(Boolean withFile) {
+        this.withFile = withFile;
     }
 }
