@@ -6,6 +6,7 @@ import cn.ac.iscas.dmo.api.sdk.http.OkHttpProps;
 import cn.ac.iscas.dmo.api.sdk.model.*;
 import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
 import cn.ac.iscas.dmo.api.sdk.model.tdengine.TdEngineSaveRequest;
+import cn.ac.iscas.dmo.api.sdk.model.tree.TreeNode;
 import cn.ac.iscas.dmo.api.sdk.service.IDmoApi;
 import cn.ac.iscas.dmo.api.sdk.util.CheckUtils;
 import cn.ac.iscas.dmo.api.sdk.util.JsonUtils;
@@ -194,6 +195,22 @@ public class DmoApiImpl implements IDmoApi {
         String res;
         try {
             res = httpClient.doPost(dmoEndpoint + url + "?sql=" + sql, header, jsonBody);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<Object> advanceDynamicSql(String url, String datasourceName, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        CheckUtils.checkNone(sql, "sql不能为空");
+        String jsonBody = "";
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "sql"), Arrays.asList(datasourceName, sql));
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, jsonBody);
+        String res;
+        try {
+            res = httpClient.doPost(dmoEndpoint + url + advanceParam.oriParamString, header, jsonBody);
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
@@ -402,7 +419,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Map<String, Object>>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Map<String, Object>>>() {
+        });
     }
 
     @Override
@@ -418,7 +436,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<TableRelationVO>>>(){});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<TableRelationVO>>>() {
+        });
     }
 
     @Override
@@ -432,12 +451,13 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<SearchResult>>(){});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<SearchResult>>() {
+        });
     }
 
     @Override
     public void advanceFileDownload(String url, String datasourceName, String filePath,
-                                                                     OutputStream os, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+                                    OutputStream os, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         if (datasourceName == null) {
             throw new DmoApiSdkException("datasourceName不能为空");
         }
@@ -539,7 +559,8 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<FileInfo>>>() {});
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<FileInfo>>>() {
+        });
     }
 
     @Override
@@ -600,6 +621,81 @@ public class DmoApiImpl implements IDmoApi {
     @Override
     public ResponseEntity<Void> fileMv(String url, String oriFilePath, String newFilePath, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         return fileCp(url, oriFilePath, newFilePath, authenticationType);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> dataModelSelect(String url, String datasourceName, String tableName, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        AdvanceParam advanceParam = getAdvanceParam(datasourceName, tableName);
+
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
+        String res;
+        try {
+            res = httpClient.doGet(dmoEndpoint + url + advanceParam.oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Map<String, Object>>>() {
+        });
+    }
+
+    @Override
+    public ResponseEntity<Void> linkFileUpload(String url, String datasourceName, String tableName, String parentPath, String refValues, List<OkHttpCustomClient.UploadInfo> uploadInfos, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+        if (parentPath == null) {
+            parentPath = "/";
+        }
+
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "tableName", "parentPath", "refValues"),
+                Arrays.asList(datasourceName, tableName, parentPath, refValues));
+
+        Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, "");
+        String res;
+        try {
+            res = httpClient.doUpload(dmoEndpoint + url + advanceParam.oriParamString, header, uploadInfos, new HashMap<>());
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public <T> ResponseEntity<List<TreeNode<T>>> dynamicTree(String url, String datasourceName, String tableName,
+                                                             String labelKey, String valueKey, String pvalueKey,
+                                                             String sortKey, Class<T> tClass, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "tableName", "labelKey", "valueKey",
+                "pvalueKey", "sortKey"), Arrays.asList(datasourceName, tableName, labelKey, valueKey, pvalueKey, sortKey));
+
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
+        String res;
+        try {
+            res = httpClient.doGet(dmoEndpoint + url + advanceParam.oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<TreeNode<T>>>>() {
+        });
+    }
+
+    @Override
+    public ResponseEntity<Void> linkFileDelete(String url, String datasourceName, String tableName, String filePath,
+                                               String refValues, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "tableName", "filePath", "refValues"),
+                Arrays.asList(datasourceName, tableName, filePath, refValues));
+
+        Map<String, String> header = createHeader(authenticationType, "DELETE", url + advanceParam.paramString, "");
+        String res;
+        try {
+            res = httpClient.doDelete(dmoEndpoint + url + advanceParam.oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, ResponseEntity.class);
     }
 
     private Map<String, String> createHeader(DataServiceAuthenticationType type, String httpMethod,

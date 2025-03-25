@@ -5,6 +5,7 @@ import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.http.OkHttpProps;
 import cn.ac.iscas.dmo.api.sdk.model.*;
 import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
+import cn.ac.iscas.dmo.api.sdk.model.tree.TreeNode;
 import cn.ac.iscas.dmo.api.sdk.service.impl.DmoApiImpl;
 import org.junit.Assert;
 import org.junit.Before;
@@ -79,6 +80,12 @@ public class DmoApiImplTest {
      */
     private final static String TEST_ADVANCE_EDIT_URL = "/dmo/data-service/advance_update";
 
+
+    /**
+     * 高级动态SQL - 拷贝自数据中台
+     */
+    private final static String TEST_ADVANCE_DYNAMIC_SQL_URL = "/dmo/data-service/advance_dynamic_sql";
+
     /**
      * 数据视图查询 - 拷贝自数据中台
      */
@@ -146,16 +153,30 @@ public class DmoApiImplTest {
     private final static String TEST_TABLE_RELATION_SELECT_URL = "/dmo/data-service/table_relation_select";
 
     /**
+     * 数据模型查询
+     * */
+    private final static String TEST_DATA_MODEL_SELECT_URL = "/dmo/data-service/data_model_select";
+
+    /**
+     * 关联文件上传
+     * */
+    private final static String TEST_LINK_FILE_UPLOAD_URL = "/dmo/file-service/link_file_upload";
+
+    /**
+     * 动态生成树
+     * */
+    private final static String TEST_DYNAMIC_TREE_URL = "/dmo/data-service/dynamic_tree";
+
+    /**
+     * 关联文件删除
+     * */
+    private final static String TEST_LINK_FILE_DELETE_URL = "/dmo/file-service/link_file_delete";
+
+    /**
      * 普通认证的TOKEN
      */
-    private final static String TOKEN = "eyJraWQiOiJkYXRhLW1pZGRsZS1vZmZpY2UiLCJhbGciOiJSUzI1NiJ9." +
-            "eyJzdWIiOiJhZG1pbiIsImF1ZCI6ImdvdmVybmFuY2UiLCJuYmYiOjE3MzY5MjgzOTEsInNjb3BlIjpbImFsbCJdLCJpc3" +
-            "MiOiJodHRwOi8vMTkyLjE2OC41MC40OTo4NjU0L3VhYSIsImV4cCI6MTczOTUyMDM5MSwiaWF0IjoxNzM2OTI4MzkxLCJqd" +
-            "GkiOiIwNTk1OGU2MS1mZGVkLTQyMjEtYTM4OC04ODM2YmMwYjdkZGUiLCJhdXRob3JpdGllcyI6WyJhbGwiLCJTVVBFUiJd" +
-            "fQ.KCotzzCq56Zf2Q-AHtLgo1YsNLVuJrNZTIm1f6diiJMTuEdgOB75dIkw8R36Hr093IUVxksEs-taQ54a1VwM1i1Hgfmi" +
-            "0yBrl9dC1h4Fa5NzOhqcMZj-GGaahHwuIM-XEoEPco1JZpEs9Sirv7gLgKtD5mjVHG38ZgMQ0Yi8Z2Xp53sx-TqM1eijZo" +
-            "cN0IOfxYjEtFr-FQcUl_VMYVluWumNfOWoYHvV-9Yy1-RczU9fjZL1S4kZRBmnuC804S7BYbTWStEG4HlN4Xfx7twge-8f" +
-            "Nt1899Qh-EuZhESJ4EPqW7GgCzg1uo4DfmQynbgc0kUSH-Z4ei89a6mEDjr8Hw";
+    private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzM5MTUyMDYzLCJleHAiOjIyNzcxNjQ4NjYs" +
+            "ImlhdCI6MTczOTE1MjA2MywicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9.smnMVgqoSE4mGviCHv6QspKlpVtsPjgLjn4XMPGjnfk";
 
     /**
      * 签名模式的appId
@@ -479,6 +500,18 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 高级动态SQL-普通认证
+     */
+    @Test
+    public void testAdvanceDynamicSql() throws DmoApiSdkException {
+        List<Map<String, Object>> addItems = createAddItems();
+        ResponseEntity<Object> res = dmoApi2.advanceDynamicSql(TEST_ADVANCE_DYNAMIC_SQL_URL,
+                "student", "SELECT * FROM COURSE", DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
      * 文件上传
      */
     @Test
@@ -627,7 +660,7 @@ public class DmoApiImplTest {
      * 获取表关系
      */
     @Test
-    public void testTableRelationSelect() throws DmoApiSdkException, IOException {
+    public void testTableRelationSelect() throws DmoApiSdkException {
         ResponseEntity<List<TableRelationVO>> relations = dmoApi2.tableRelationSelect(TEST_TABLE_RELATION_SELECT_URL,
                 "161-dm-DMO",
                 "ods_TEST_PARENT",
@@ -636,12 +669,59 @@ public class DmoApiImplTest {
         Assert.assertEquals(relations.getStatus().longValue(), 200L);
     }
 
+    /**
+     * 数据模型查询
+     * */
+    @Test
+    public void dataModelSelect() throws DmoApiSdkException {
+        ResponseEntity<Map<String, Object>> res = dmoApi2.dataModelSelect(TEST_DATA_MODEL_SELECT_URL,
+                "student",
+                "course",
+                DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
     private static List<OkHttpCustomClient.UploadInfo> createUploadInfos() throws FileNotFoundException {
         OkHttpCustomClient.UploadInfo<InputStream> uploadInfo = new OkHttpCustomClient.UploadInfo<>();
         uploadInfo.setFormKey("files");
         uploadInfo.setData(new FileInputStream("C:\\文档资料\\701\\rocketmq+grpc.docx"));
-        uploadInfo.setFileName("云平台.mp4");
+        uploadInfo.setFileName("rocketmq_grpc.docx");
         return Arrays.asList(uploadInfo);
+    }
+
+    /**
+     * 关联文件上传
+     */
+    @Test
+    public void testLinkFileUpload() throws DmoApiSdkException, FileNotFoundException {
+        List<OkHttpCustomClient.UploadInfo> uploadInfos = createUploadInfos();
+        ResponseEntity<Void> res = dmoApi2.linkFileUpload(TEST_LINK_FILE_UPLOAD_URL, "101-mysql-dmo",
+                "dict_data", "/", "1", uploadInfos, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 动态生成树
+     */
+    @Test
+    public void testDynamicTree() throws DmoApiSdkException, FileNotFoundException {
+        ResponseEntity<List<TreeNode<Map>>> res = dmoApi2.dynamicTree(TEST_DYNAMIC_TREE_URL, "161-JDZC", "EQUIPMENT",
+                "NAME", "ID", "PID", "ORDER_BY", Map.class, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 关联文件删除
+     */
+    @Test
+    public void testLinkFileDelete() throws DmoApiSdkException {
+        ResponseEntity<Void> res = dmoApi2.linkFileDelete(TEST_LINK_FILE_DELETE_URL, "101-mysql-dmo",
+                "dict_data", "/data_ref_files/101-mysql-dmo/dict_data/1/rocketmq_grpc.docx", "1", DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
 
     private static DmoRequest createSearchRequest() {

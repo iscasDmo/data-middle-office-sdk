@@ -5,6 +5,7 @@ import cn.ac.iscas.dmo.api.sdk.http.OkHttpCustomClient;
 import cn.ac.iscas.dmo.api.sdk.model.*;
 import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
 import cn.ac.iscas.dmo.api.sdk.model.tdengine.TdEngineSaveRequest;
+import cn.ac.iscas.dmo.api.sdk.model.tree.TreeNode;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -90,6 +91,19 @@ public interface IDmoApi {
      * @since jdk1.8
      */
     ResponseEntity<Object> dynamicSql(String url, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 高级动态SQL
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName     数据源名
+     * @param sql                sql语句
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2024/10/30
+     * @since jdk1.8
+     */
+    ResponseEntity<Object> advanceDynamicSql(String url, String datasourceName, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
     /**
      * 自定义SQL
@@ -223,7 +237,7 @@ public interface IDmoApi {
 
 
     /**
-     * 获取某个标的关联关系
+     * 获取某个表的关联关系
      *
      * @param url                接口URL，从数据中台获取
      * @param datasourceName     数据源名
@@ -247,7 +261,7 @@ public interface IDmoApi {
      * @since jdk1.8
      */
     ResponseEntity<SearchResult> linkDataSelect(String url, LinkDataRequest linkDataRequest,
-                                                       DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+                                                DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
     /**
      * 高级文件下载
@@ -376,5 +390,71 @@ public interface IDmoApi {
      */
     ResponseEntity<Void> fileMv(String url, String oriFilePath, String newFilePath,
                                 DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 数据模型查询
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName        数据源名
+     * @param tableName        表名
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2025/03/25
+     * @since jdk1.8
+     */
+    ResponseEntity<Map<String, Object>> dataModelSelect(String url, String datasourceName, String tableName,
+                                                        DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 关联文件上传
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName        数据源名
+     * @param tableName        表名
+     * @param parentPath        文件上级路径
+     * @param refValues        关联数据的值，多个以逗号分隔
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2025/03/25
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> linkFileUpload(String url, String datasourceName, String tableName, String parentPath,
+                                        String refValues, List<OkHttpCustomClient.UploadInfo> uploadInfos, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 生成动态树
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName        数据源名
+     * @param tableName        表名
+     * @param labelKey        label字段
+     * @param valueKey        value字段
+     * @param pvalueKey        上级value字段
+     * @param sortKey        排序字段
+     * @param tClass        泛型
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2025/03/25
+     * @since jdk1.8
+     */
+    <T> ResponseEntity<List<TreeNode<T>>> dynamicTree(String url, String datasourceName, String tableName, String labelKey,
+                                                      String valueKey, String pvalueKey, String sortKey, Class<T> tClass,
+                                                      DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
+    /**
+     * 关联文件删除
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName        数据源名
+     * @param tableName        表名
+     * @param filePath        文件路径
+     * @param refValues        关联文件值，多个以逗号分隔
+     * @param authenticationType 接口鉴权方式，不鉴权/普通鉴权/签名鉴权
+     * @return 响应结果
+     * @date 2025/03/25
+     * @since jdk1.8
+     */
+    ResponseEntity<Void> linkFileDelete(String url, String datasourceName, String tableName, String filePath,
+                                        String refValues, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
 }
