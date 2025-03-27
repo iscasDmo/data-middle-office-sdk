@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -186,7 +187,10 @@ public class DmoApiImpl implements IDmoApi {
 //        String sqlParam = "sql=" + sql;
         String encodeParam;
         try {
-            encodeParam = "sql=" + URLEncoder.encode(sql, "UTF-8").replace("+", "%20");
+            if (!isURLEncoded(sql)) {
+                sql = URLEncoder.encode(sql, "UTF-8").replace("+", "%20");
+            }
+            encodeParam = "sql=" + sql;
         } catch (UnsupportedEncodingException e) {
             throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
         }
@@ -206,6 +210,13 @@ public class DmoApiImpl implements IDmoApi {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         CheckUtils.checkNone(sql, "sql不能为空");
         String jsonBody = "";
+        if (!isURLEncoded(sql)) {
+            try {
+                sql = URLEncoder.encode(sql, "UTF-8").replace("+", "%20");
+            } catch (UnsupportedEncodingException e) {
+                throw new DmoApiSdkException("编码出错:" + e.getMessage(), e);
+            }
+        }
         AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "sql"), Arrays.asList(datasourceName, sql));
         Map<String, String> header = createHeader(authenticationType, "POST", url + advanceParam.paramString, jsonBody);
         String res;
@@ -749,14 +760,18 @@ public class DmoApiImpl implements IDmoApi {
         return new AdvanceParam(paramString, oriParamString);
     }
 
-    private static AdvanceParam getAdvanceParam(List<String> keys, List<String> values) throws DmoApiSdkException {
+    private  AdvanceParam getAdvanceParam(List<String> keys, List<String> values) throws DmoApiSdkException {
         List<String> params = new ArrayList<>();
         List<String> oriParams = new ArrayList<>();
         try {
             for (int i = 0; i < keys.size(); i++) {
                 String key = keys.get(i);
                 String value = values.get(i);
-                params.add(key + "=" + URLEncoder.encode(value, "UTF-8").replace("+", "%20"));
+                String encodeValue = value;
+                if (!isURLEncoded(value)) {
+                    encodeValue = URLEncoder.encode(value, "UTF-8").replace("+", "%20");
+                }
+                params.add(key + "=" + encodeValue);
                 oriParams.add(key + "=" + value);
             }
         } catch (UnsupportedEncodingException e) {
@@ -782,5 +797,15 @@ public class DmoApiImpl implements IDmoApi {
 
     public String getAppSecret() {
         return appSecret;
+    }
+
+    public boolean isURLEncoded(String str) {
+        try {
+            String decoded = URLDecoder.decode(str, "UTF-8");
+            return !str.equals(decoded);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

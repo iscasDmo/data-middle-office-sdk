@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -48,7 +49,7 @@ public class DmoApiImplTest {
     /**
      * 动态SQL的URL - 拷贝自数据中台
      */
-    private final static String TEST_DYNAMIC_SQL_URL = "/dmo/data-service/主题域1/mysql-dmo/DYNAMIC_SQL/1729737225913";
+    private final static String TEST_DYNAMIC_SQL_URL = "/dmo/data-service/基础数据/基础数据库/DYNAMIC_SQL/1742802442317";
 
     /**
      * 自定义SQL的URL - 拷贝自数据中台
@@ -175,35 +176,34 @@ public class DmoApiImplTest {
     /**
      * 普通认证的TOKEN
      */
-    private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzM5MTUyMDYzLCJleHAiOjIyNzcxNjQ4NjYs" +
-            "ImlhdCI6MTczOTE1MjA2MywicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9.smnMVgqoSE4mGviCHv6QspKlpVtsPjgLjn4XMPGjnfk";
+    private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzQxODY0MDQ0LCJleHAiOjE4M" +
+            "DYwNTkyNDcsImlhdCI6MTc0MTg2NDA0NCwicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9.XY" +
+            "HfYBudmZLNI2M3_plREdpauzxidw-KtZ871KtYJrk";
 
     /**
      * 签名模式的appId
      */
-    private final static String APP_ID = "18449783-dd52-42aa-8e7e-5b9f9c3c8418";
+    private final static String APP_ID = "b30ff719-a666-4004-a3b5-68a63b053efc";
 
     /**
      * 签名模式的appSecret
      */
-    private final static String APP_SECRET = "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDHIaIbkrKQZGm" +
-            "P15ecUkxI1ozy99Q5W4irvWOSeU57VSkI0m4AbVa/dVfFt6MwO9rExg4Sri3ppeuACyAxS32TKVEdnvwf308q/QEB/44i" +
-            "8bwdB9Lj+B8HucwS2GpChJzbJdoZteaB8K8vc+xpp76clpSvDbswjhYXH4fe+ocdRsyciQSYfcFAighb9+Y" +
-            "5nywLXebfapZSKi54a9wQxgDAwYxHXX7hs+7B0jwfO03Ju8btCNd8JC9Y67WUFs+PYIIwJ7NYdE3od8KstJh3jtiOhLAuX" +
-            "Jk92ydImVXazlScQdvdiX6016ezEZVN/1ioUAWG6wmIWX0eDsEUZTdnqH3tAgMBAAECggEAH4xdkX7BWYz/CHIArBy" +
-            "Bx3xuYkQPVHMDCSp9LwSXAYUxdhtYoCqydqzRlhqM+SRSeaBjNGRyE7VcxTF+DTFHmNwP5OB+U1JeyZHB6h4h17lysyq9" +
-            "J670w5WVFltBIn6+Fx49GpuuBGIsbxkvmGGiGk7lCYLkaEHqkAlHznTkmSeJ0RSjbJUxa9KZCcr87YLyMAZYQFKs08ssKsXq" +
-            "NIhzXyCeLhxkg6ZsJtm28yLef1nj6gugl1yKKkt1Zapapq7rIyTmar5pzR4UnbETWrt3lKV0kXZxd2RbGeEiuEOkhZQO7RBuu" +
-            "FEfFvccOBCDr35vA35Z90MaqDk0+rubkn5hhQKBgQDfGKF3kyrPUniEuM5MhVbYyjnsEjSRXLPiJ9JxHcDMDu7ZfY5URDy" +
-            "dIi/37Et5QjKv+n1JNAL8nzMfNPPgBVyySDQcfmTqhzjU1LUIVCB4o2vhlY071T+Go92qUOjRKBMNrY6pJ3DtRnoF3JkoY" +
-            "RuxPubACK7LjMcS14GeOmsxVwKBgQDkgCuWjp3GYztVbEc+UWREfIXhcGioj/qzOqEJcx14KblR8o0MlVseHHG5anD2B/UZg2J" +
-            "KhzhpK1f+dwJh5Cqshgr5QuzIZ+GQhw+vzRER4VtlkNJAV/g/LHtBMFaQqfFNPDNAcODpanEquF1khfmP7NsNLP6ZUqhsrgtP" +
-            "pqUsWwKBgQCf7QQyt6jEnhYO7nvUlvE+zxjehd5xJcc9o9ZTiEShA0NtXXgeKBxbeBpy20zvS+kSBbqyMzrA5U68XDVGrhFZLD" +
-            "FPC7xD81NmHmT353avhFbdi1uHPMMhPW61nPKInPWrpHLUB5YIQbFPamfQbmxvjuvTVWYYPH6onxwn1TDqWQKBgQC/61sw8IZaK" +
-            "9yZCgHouKoTz9cPG7/73DqAMT0y16on1DugNa38pLHMX62xQ1Kvgs19aVm0KVDbHJmi1Eh++gpRr6Al7e09Aet13cryKLYuo26F" +
-            "pxbBDmImhXDctwHuLZ7L9UVC2cw+oLV+YS2oEdMj7JerwF/zXXazGZfMhbZzwwKBgQCZQHUk9AIuhl8auqOk/TWhECVBjkFpF" +
-            "tc+4y3JC3p2Y+LbVKi0J946Mk1/3dhDHbsYRu+BBCePPM58cr9MJtUVXtXBkxSqSkT95znPKRuVahRP8ECSvtsMYbxi8EyS7f8" +
-            "iYpTKWclrrfAxVTuvjMcW8ToNhZpCZ2+a8ixpR0ElDA==";
+    private final static String APP_SECRET = "MIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQCzVwnD/dGjk4B6m26PLZjY0A" +
+            "3TuAbZjcUrT7oEjmf4+z1ku9EQlrIz46lX7Rx3TFIoifXCBzganjo9w+BsGxaWqu0P7MJkHJHoYsGaSrefaX/500lDx1oLGFgdKxeijtwSl" +
+            "4aT2lt91vli6ZCZdacWbiyetJV6RffFlZGKfTlkZiTvHjri/yK2HZWXbbvC4XFA33yFPkQTsEhPYagtlU4wrWnmPbMLN/vQpTXdGEW5kBXp" +
+            "cle+3BHfnGnpkn3+40tTHLtiJMmX836BBoqgkCSthD9SWnOy7z1bhW4ju8aycFUMd8WaIAlCwOjfpFm8TmEGYzqiw6wnn7SEAHDfjLSHAgMBAA" +
+            "ECggEAMRD2rIdEtI7WH3VoJccxYtxldBAM27fUgpmRCM8XdkDy1p0mQXYhcl3uxo4qdB9O+SVptji4alvxDlYJkDpHD1jbfDhoJPDGIM" +
+            "DoPDkGDRjVuTnL+T3RDmkOLojMMh8I6hNH8CrVTlQjLiM9+yZ73QCut4srvGTpOcdGpw/ExIlRe7zliv3EOikrEmUWiMPAAooy7JcAA" +
+            "E3Qd1eKNmDGimZejmieSYVv1orydP5Wc6wv9JmhFxSM4AZwB0S2bkkEekGCnwbfVDaJXmXsOIvr12eQpkvomQloyaDcIwx2+8d3UKKQ1" +
+            "7yXhjruNS7rdeSFsySzFesIUHEt0C6cp4YIWQKBgQC7yErOUcuKnuDRwlDLqaNIwoHNJVM2PH1D9oQA7uVx0ssoBzOpM0Ym1ZgVhfcBuG" +
+            "BuREoE3/dODEI0XzBvqjkAV5tUxXJTG9GlwRqKhMVCzI5GjYDIvH1OPbxF80yCo+163GPMfTN9X6N1J0JCBGGW22+F661oAorVgbEfoeUG" +
+            "SQKBgQD0fZr11p7oG/UgA2XeGqb22rHQmeDPC2SMYvlfOykelvdIBVQdGggDihW20w9tR8HRQJuq7izuMUr5dWJ+6FukcpJUELcGyOrvUOP" +
+            "RW5pkE43PgmcUTxJUCtoWDRbwRhJ5VC4UXTdBjgBTvpeNWFaehtXVnZt8HMeDR29HjxGkTwKBgBaNfKaA3mA8qqWmn8uGCS1Q5wP7ap4F" +
+            "78l8zufJyVa9SVb6XnMAzHkXiBd1qm/TdAlqPDWPrIT8JetiT0/p8sSewPIScKOYoLo2kfh277YRGTlR/1icgrQl5/nCubqq83ehBn9l" +
+            "vgxdsyT73RJOsmXK3v8HiiEGxSPVWq+A4x+5AoGAcMs94Wr5dsXnKbTHm1cabkpovH8xWvO7mJTUzV2C0+z7+ksTCjYHOnLLH8Rxmo" +
+            "3/WeV/q7UkH2O4XiwMm9Xg6ZY98fCgL84jrPLZl622JbNrui9EFPeB0ioLgR7a1VDOlxECDT0QD/tOJVSJoJj/pTU5k8qZgAHa/bLI" +
+            "IPBdSDsCf29ZpM9T6XB0TWcur2yXj0ENXnxOA+/ZxhQJ7ypjFwF49NoomXdHnUBD6LZ/7i/S7aG3Mj0UcoRs0314rEMp/1WZHNlkXnjH" +
+            "z2GOgzeq4sEkYVW7wgFK/lrU8LcrywXZoaHv67Z8ne//nazgz5Tvw0z/Kx66ZQzVue+utHbLj2c=";
 
     IDmoApi dmoApi1;
     IDmoApi dmoApi2;
@@ -212,14 +212,14 @@ public class DmoApiImplTest {
     @Before
     public void setUp() {
         // 无需鉴权的模式
-        dmoApi1 = new DmoApiImpl("http://192.168.50.49:3282");
+        dmoApi1 = new DmoApiImpl("http://192.168.50.49:6282");
 
         // 普通鉴权模式(无需鉴权模式的API也可以调用)
-        dmoApi2 = new DmoApiImpl("http://192.168.50.49:3282", new OkHttpProps(),
+        dmoApi2 = new DmoApiImpl("http://192.168.50.49:6282", new OkHttpProps(),
                 TOKEN, null, null);
 
         // 签名鉴权模式 + 普通鉴权模式 (无需鉴权模式的API、普通鉴权的API、签名鉴权的API都可以调用)
-        dmoApi3 = new DmoApiImpl("http://192.168.50.49:3282", new OkHttpProps(),
+        dmoApi3 = new DmoApiImpl("http://192.168.50.49:6282", new OkHttpProps(),
                 TOKEN, APP_ID, APP_SECRET);
     }
 
@@ -379,7 +379,7 @@ public class DmoApiImplTest {
      * 执行动态SQL-普通认证
      */
     @Test
-    public void testDynamicSql2() throws DmoApiSdkException {
+    public void testDynamicSql2() throws DmoApiSdkException, UnsupportedEncodingException {
         String sql = createDynamicSql();
         ResponseEntity<Object> res = dmoApi2.dynamicSql(TEST_DYNAMIC_SQL_URL, sql, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
@@ -779,7 +779,25 @@ public class DmoApiImplTest {
     }
 
     private String createDynamicSql() {
-        return "SELECT * FROM dict_data";
+//        return "SELECT * FROM BASEDATA.MIL_TROOP_RESOURCE";
+        String sql = "SELECT tr.ID, tr.TROOP_TYPE, tr.LEVEL, tr.POSITION, tr.QUANTITY, tr.SKILL_LEVEL, tr.IS_OPERATOR, tr.TAGS, u.NAME AS UNIT_NAME \n" +
+                "FROM BASEDATA.MIL_TROOP_RESOURCE tr \n" +
+                "LEFT JOIN BASEDATA.MIL_UNIT u ON tr.UNIT_ID = u.ID WHERE tr.DELETE_FLAG = 0 \n" +
+                "AND u.DELETE_FLAG = 0 \n" +
+                "AND tr.TROOP_TYPE IN ('步兵') \n" +
+                "AND tr.LEVEL IN ('上等兵') \n" +
+                "AND tr.POSITION IN ('步枪手') \n" +
+                "AND tr.QUANTITY = 20 \n" +
+                "AND tr.SKILL_LEVEL IN ('B') \n" +
+                "AND tr.IS_OPERATOR = 0 \n" +
+                "AND u.NAME LIKE '%维修三排%' \n" +
+                "LIMIT 100 OFFSET 0 ";
+//        try {
+//            sql = URLEncoder.encode(sql, "utf-8");
+//        } catch (UnsupportedEncodingException e) {
+//            throw new RuntimeException(e);
+//        }
+        return sql;
     }
 
     private List<Object> createCustomData() {
