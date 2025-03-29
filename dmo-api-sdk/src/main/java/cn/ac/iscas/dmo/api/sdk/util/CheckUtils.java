@@ -30,10 +30,10 @@ public class CheckUtils {
 
     public static void checkAuthorizationType(DataServiceAuthenticationType authenticationType,
                                               DmoApiImpl api) throws DmoApiSdkException {
-        if (authenticationType == DataServiceAuthenticationType.SIMPLE &&
-                Objects.isNull(api.getToken())) {
-            throw new DmoApiSdkException("鉴权方式为[普通模式],但token未设置，可在DmoApiImpl类的构造函数中设置token");
-        } else if (authenticationType == DataServiceAuthenticationType.SIGN &&
+//        if (authenticationType == DataServiceAuthenticationType.SIMPLE && Objects.isNull(api.getToken())) {
+//            throw new DmoApiSdkException("鉴权方式为[普通模式],但token未设置，可在DmoApiImpl类的构造函数中设置token");
+//        } else
+            if (authenticationType == DataServiceAuthenticationType.SIGN &&
                 (Objects.isNull(api.getAppId()) || Objects.isNull(api.getAppSecret()))) {
             throw new DmoApiSdkException("鉴权方式为[签名模式],但appId或appSecret为空，可在DmoApiImpl的构造函数中设置");
         }

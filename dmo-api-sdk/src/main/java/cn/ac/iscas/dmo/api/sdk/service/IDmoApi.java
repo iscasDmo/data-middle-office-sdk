@@ -7,7 +7,6 @@ import cn.ac.iscas.dmo.api.sdk.model.dataview.GeneralQueryRequest;
 import cn.ac.iscas.dmo.api.sdk.model.tdengine.TdEngineSaveRequest;
 import cn.ac.iscas.dmo.api.sdk.model.tree.TreeNode;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,16 @@ import java.util.Map;
  */
 
 public interface IDmoApi {
+
+    ThreadLocal<String> DYNAMIC_TOKEN = new ThreadLocal<>();
+
+    static void setDynamicToken(String dynamicToken) {
+        DYNAMIC_TOKEN.set(dynamicToken);
+    }
+
+    static void removeDynamicToken() {
+        DYNAMIC_TOKEN.remove();
+    }
 
     /**
      * 通用查询

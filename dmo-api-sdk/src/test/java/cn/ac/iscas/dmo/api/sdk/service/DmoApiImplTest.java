@@ -379,9 +379,18 @@ public class DmoApiImplTest {
      * 执行动态SQL-普通认证
      */
     @Test
-    public void testDynamicSql2() throws DmoApiSdkException, UnsupportedEncodingException {
+    public void testDynamicSql2() throws DmoApiSdkException {
+        String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzQxODY0MDQ0LCJleHAiOjE4M" +
+                "DYwNTkyNDcsImlhdCI6MTc0MTg2NDA0NCwicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9.XY" +
+                "HfYBudmZLNI2M3_plREdpauzxidw-KtZ871KtYJrk";
         String sql = createDynamicSql();
-        ResponseEntity<Object> res = dmoApi2.dynamicSql(TEST_DYNAMIC_SQL_URL, sql, DataServiceAuthenticationType.SIMPLE);
+        ResponseEntity<Object> res;
+        try {
+            IDmoApi.setDynamicToken(TOKEN);
+            res = dmoApi2.dynamicSql(TEST_DYNAMIC_SQL_URL, sql, DataServiceAuthenticationType.SIMPLE);
+        } finally {
+            IDmoApi.removeDynamicToken();
+        }
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }

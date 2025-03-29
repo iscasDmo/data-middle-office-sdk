@@ -713,7 +713,12 @@ public class DmoApiImpl implements IDmoApi {
                                              String url, String body) throws DmoApiSdkException {
         Map<String, String> headers = new HashMap<>();
         if (type == DataServiceAuthenticationType.SIMPLE) {
-            headers.put("Authorization", token);
+            String token = IDmoApi.DYNAMIC_TOKEN.get();
+            if (Objects.nonNull(token)) {
+                headers.put("Authorization", token);
+            } else {
+                headers.put("Authorization", this.token);
+            }
         } else if (type == DataServiceAuthenticationType.SIGN) {
             try {
                 String token = SignApiUtils.createToken(appId, httpMethod, url, body,
@@ -803,8 +808,7 @@ public class DmoApiImpl implements IDmoApi {
         try {
             String decoded = URLDecoder.decode(str, "UTF-8");
             return !str.equals(decoded);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
             return false;
         }
     }
