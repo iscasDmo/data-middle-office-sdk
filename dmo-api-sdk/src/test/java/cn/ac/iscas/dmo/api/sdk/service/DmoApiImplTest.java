@@ -149,7 +149,7 @@ public class DmoApiImplTest {
     private final static String TEST_MV_FILE_URL = "/dmo/file-service/主题域1/local-file/mv";
 
     /**
-     * 移动或重命名文件
+     * 表关系URL
      * */
     private final static String TEST_TABLE_RELATION_SELECT_URL = "/dmo/data-service/table_relation_select";
 
@@ -175,6 +175,7 @@ public class DmoApiImplTest {
 
     /**文件全文检索*/
     private static final String TEST_FILE_FULLTEXT_SEARCH_URL = "/dmo/file-service/file_fulltext_search";
+
     /**
      * 普通认证的TOKEN
      */
@@ -451,11 +452,32 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 字典查询-不认证
+     */
+    @Test
+    public void testDic2() throws DmoApiSdkException {
+        ResponseEntity<List<Dic>> res = dmoApi1.searchDic(null, "sys.backup.status", null);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+
+    /**
      * 参数查询-不认证
      */
     @Test
     public void testParam1() throws DmoApiSdkException {
         ResponseEntity<List<Param>> res = dmoApi1.searchParam(TEST_PARAM_SEARCH_URL, null, "sys.super.user.default.pwd", null);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 参数查询-不认证
+     */
+    @Test
+    public void testParam2() throws DmoApiSdkException {
+        ResponseEntity<List<Param>> res = dmoApi1.searchParam(null, "sys.super.user.default.pwd", null);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
@@ -467,6 +489,19 @@ public class DmoApiImplTest {
     public void testAdvanceSearch2() throws DmoApiSdkException {
         DmoRequest request = createSearchRequest();
         ResponseEntity<SearchResult> res = dmoApi2.advanceSearch(TEST_ADVANCE_SEARCH_URL,
+                "mysql-dmo", "ods_test03", request, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertNotNull(res.getValue());
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级查询-普通认证
+     */
+    @Test
+    public void testAdvanceSearch3() throws DmoApiSdkException {
+        DmoRequest request = createSearchRequest();
+        ResponseEntity<SearchResult> res = dmoApi2.advanceSearch(
                 "mysql-dmo", "ods_test03", request, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertNotNull(res.getValue());
@@ -486,12 +521,36 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 高级新增-普通认证
+     */
+    @Test
+    public void testAdvanceAdd3() throws DmoApiSdkException {
+        List<Map<String, Object>> addItems = createAddItems();
+        ResponseEntity<Void> res = dmoApi2.advanceAdd(
+                "mysql-dmo", "ods_test03", addItems, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
      * 高级修改-普通认证
      */
     @Test
     public void testAdvanceEdit2() throws DmoApiSdkException {
         List<UpdateEntity> updateEntities = createUpdateEntities();
         ResponseEntity<Void> res = dmoApi2.advanceEdit(TEST_ADVANCE_EDIT_URL,
+                "mysql-dmo", "ods_test03", updateEntities, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级修改-普通认证
+     */
+    @Test
+    public void testAdvanceEdit3() throws DmoApiSdkException {
+        List<UpdateEntity> updateEntities = createUpdateEntities();
+        ResponseEntity<Void> res = dmoApi2.advanceEdit(
                 "mysql-dmo", "ods_test03", updateEntities, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
@@ -510,11 +569,34 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 高级删除-普通认证
+     */
+    @Test
+    public void testAdvanceDelete3() throws DmoApiSdkException {
+        List<Map<String, Object>> deleteEntities = createDeleteEntities();
+        ResponseEntity<Void> res = dmoApi2.advanceDelete(
+                "mysql-dmo", "ods_test03", deleteEntities, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
      * 高级动态SQL-普通认证
      */
     @Test
     public void testAdvanceDynamicSql() throws DmoApiSdkException {
         ResponseEntity<Object> res = dmoApi2.advanceDynamicSql(TEST_ADVANCE_DYNAMIC_SQL_URL,
+                "地理信息库", "select grid_number, lon_center, lat_center, lon_top_right, lat_top_right, lon_top_left, lat_top_left, lon_bottom_right, lat_bottom_right, lon_bottom_left, lat_bottom_left from \tpublic.grid_2m_8035 g where g.lon_top_right > 79.08551411883477 and g.lat_top_right > 32.50041814133521 \tand g.lon_bottom_left < 79.09616588116523 \tand g.lat_bottom_left < 32.509461858664785   order by grid_number desc  limit 10 offset 1", DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 高级动态SQL-普通认证
+     */
+    @Test
+    public void testAdvanceDynamicSql2() throws DmoApiSdkException {
+        ResponseEntity<Object> res = dmoApi2.advanceDynamicSql(
                 "地理信息库", "select grid_number, lon_center, lat_center, lon_top_right, lat_top_right, lon_top_left, lat_top_left, lon_bottom_right, lat_bottom_right, lon_bottom_left, lat_bottom_left from \tpublic.grid_2m_8035 g where g.lon_top_right > 79.08551411883477 and g.lat_top_right > 32.50041814133521 \tand g.lon_bottom_left < 79.09616588116523 \tand g.lat_bottom_left < 32.509461858664785   order by grid_number desc  limit 10 offset 1", DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
@@ -569,6 +651,18 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 高级文件下载
+     */
+    @Test
+    public void testAdvanceFileDownload2() throws DmoApiSdkException, IOException {
+        File file = new File("c:/tmp/test.avi");
+        try (OutputStream os = new FileOutputStream(file)) {
+            dmoApi2.advanceFileDownload( "local-file", "/视频/test.avi", os,
+                    DataServiceAuthenticationType.SIMPLE);
+        }
+    }
+
+    /**
      * 数据视图查询
      */
     @Test
@@ -576,6 +670,20 @@ public class DmoApiImplTest {
         GeneralQueryRequest req = new GeneralQueryRequest.GeneralQueryRequestBuilder()
                 .pageNumber(1).pageSize(10).build();
         ResponseEntity<Map<String, Object>> res = dmoApi2.dataViewSearch(TEST_DATA_VIEW_SEARCH_URL, req,
+                "data_view_template_simple.xml",
+                DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 数据视图查询
+     */
+    @Test
+    public void testDataViewSearch2() throws DmoApiSdkException, IOException {
+        GeneralQueryRequest req = new GeneralQueryRequest.GeneralQueryRequestBuilder()
+                .pageNumber(1).pageSize(10).build();
+        ResponseEntity<Map<String, Object>> res = dmoApi2.dataViewSearch(req,
                 "data_view_template_simple.xml",
                 DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
@@ -611,6 +719,34 @@ public class DmoApiImplTest {
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
 
+    /**
+     * 关联数据查询
+     */
+    @Test
+    public void testLinkDataSearch2() throws DmoApiSdkException, IOException {
+        TableRelationVO tableRelationVO = new TableRelationVO();
+        tableRelationVO.setTable("ods_TEST_PARENT");
+        tableRelationVO.setTargetTable("ods_TEST_CHILD");
+        tableRelationVO.setMiddleTableRelation(true);
+        tableRelationVO.setMiddleTable("ods_TEST_MIDDLE");
+        tableRelationVO.setCols(Collections.singletonList("ID"));
+        tableRelationVO.setTargetCols(Collections.singletonList("ID"));
+        tableRelationVO.setMiddleCols(Collections.singletonList("PID"));
+        tableRelationVO.setTargetMiddleCols(Collections.singletonList("CID"));
+        LinkDataRequest linkDataRequest = new LinkDataRequest.LinkDataRequestBuilder()
+                .request(new DmoRequest.DmoRequestBuilder().page(1, 10).build())
+                .datasourceName("161-dm-DMO")
+                .item(new HashMap<String, Object>() {{
+                    put("ID", 1);
+                    put("NAME", "李四");
+                }})
+                .relation(tableRelationVO)
+                .build();
+        ResponseEntity<SearchResult> res = dmoApi2.linkDataSelect(
+                linkDataRequest, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
 
     /**
      * 获取文件列表
@@ -679,11 +815,37 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 获取表关系
+     */
+    @Test
+    public void testTableRelationSelect2() throws DmoApiSdkException {
+        ResponseEntity<List<TableRelationVO>> relations = dmoApi2.tableRelationSelect(
+                "161-dm-DMO",
+                "ods_TEST_PARENT",
+                DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(relations);
+        Assert.assertEquals(relations.getStatus().longValue(), 200L);
+    }
+
+    /**
      * 数据模型查询
      * */
     @Test
     public void dataModelSelect() throws DmoApiSdkException {
         ResponseEntity<Map<String, Object>> res = dmoApi2.dataModelSelect(TEST_DATA_MODEL_SELECT_URL,
+                "student",
+                "course",
+                DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 数据模型查询
+     * */
+    @Test
+    public void dataModelSelect2() throws DmoApiSdkException {
+        ResponseEntity<Map<String, Object>> res = dmoApi2.dataModelSelect(
                 "student",
                 "course",
                 DataServiceAuthenticationType.SIMPLE);
@@ -712,11 +874,34 @@ public class DmoApiImplTest {
     }
 
     /**
+     * 关联文件上传
+     */
+    @Test
+    public void testLinkFileUpload2() throws DmoApiSdkException, FileNotFoundException {
+        List<OkHttpCustomClient.UploadInfo> uploadInfos = createUploadInfos();
+        ResponseEntity<Void> res = dmoApi2.linkFileUpload( "101-mysql-dmo",
+                "dict_data", "/", "1", uploadInfos, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
      * 动态生成树
      */
     @Test
     public void testDynamicTree() throws DmoApiSdkException, FileNotFoundException {
         ResponseEntity<List<TreeNode<Map>>> res = dmoApi2.dynamicTree(TEST_DYNAMIC_TREE_URL, "161-JDZC", "EQUIPMENT",
+                "NAME", "ID", "PID", "ORDER_BY", Map.class, DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+
+    /**
+     * 动态生成树
+     */
+    @Test
+    public void testDynamicTree2() throws DmoApiSdkException, FileNotFoundException {
+        ResponseEntity<List<TreeNode<Map>>> res = dmoApi2.dynamicTree("161-JDZC", "EQUIPMENT",
                 "NAME", "ID", "PID", "ORDER_BY", Map.class, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
@@ -732,6 +917,17 @@ public class DmoApiImplTest {
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
+
+    /**
+     * 关联文件删除
+     */
+    @Test
+    public void testLinkFileDelete2() throws DmoApiSdkException {
+        ResponseEntity<Void> res = dmoApi2.linkFileDelete("101-mysql-dmo",
+                "dict_data", "/data_ref_files/101-mysql-dmo/dict_data/1/rocketmq_grpc.docx", "1", DataServiceAuthenticationType.SIMPLE);
+        Assert.assertNotNull(res);
+        Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
     
     /**
      * 文件全文检索
@@ -739,6 +935,18 @@ public class DmoApiImplTest {
     @Test
     public void testFileFulltextSearch() throws DmoApiSdkException {
         TableResponse<FileFulltextVO> res = dmoApi2.fileFulltextSearch(TEST_FILE_FULLTEXT_SEARCH_URL,
+                null,
+                FileFulltextSearchType.all,
+                "的", 1, 10, DataServiceAuthenticationType.SIMPLE);
+        System.out.println(res);
+    }
+
+    /**
+     * 文件全文检索
+     * */
+    @Test
+    public void testFileFulltextSearch2() throws DmoApiSdkException {
+        TableResponse<FileFulltextVO> res = dmoApi2.fileFulltextSearch(
                 null,
                 FileFulltextSearchType.all,
                 "的", 1, 10, DataServiceAuthenticationType.SIMPLE);

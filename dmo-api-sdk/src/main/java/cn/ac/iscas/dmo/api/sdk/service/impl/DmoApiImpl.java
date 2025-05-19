@@ -49,6 +49,85 @@ public class DmoApiImpl implements IDmoApi {
     private String appSecret;
 
     /**
+     * 高级动态SQL url
+     * */
+    private final static String ADVANCE_DYNAMIC_SQL_URL = "/dmo/data-service/advance_dynamic_sql";
+
+    /**
+     * 字典查询的URL
+     */
+    private final static String DIC_SEARCH_URL = "/dmo/dic-service/search";
+
+    /**
+     * 参数查询的URL
+     */
+    private final static String PARAM_SEARCH_URL = "/dmo/param-service/search";
+
+    /**
+     * 高级查询的URL
+     */
+    private final static String ADVANCE_SEARCH_URL = "/dmo/data-service/advance_select";
+
+    /**
+     * 高级新增的URL
+     */
+    private final static String ADVANCE_ADD_URL = "/dmo/data-service/advance_insert";
+
+    /**
+     * 高级修改的URL
+     */
+    private final static String ADVANCE_EDIT_URL = "/dmo/data-service/advance_update";
+
+    /**
+     * 高级删除的URL - 拷贝自数据中台
+     */
+    private final static String ADVANCE_DELETE_URL = "/dmo/data-service/advance_delete";
+
+    /**
+     * 数据视图查询
+     */
+    private final static String DATA_VIEW_SEARCH_URL = "/dmo/data-service/data_view_search";
+
+    /**
+     * 表关系URL
+     * */
+    private final static String TABLE_RELATION_SELECT_URL = "/dmo/data-service/table_relation_select";
+
+    /**
+     * 关联数据查询
+     */
+    private final static String LINK_DATA_SEARCH_URL = "/dmo/data-service/link_data_select";
+
+    /**
+     * 高级文件下载
+     * */
+    private final static String ADVANCE_DOWNLOAD_FILE_URL = "/dmo/file-service/advance_download";
+
+    /**
+     * 数据模型查询
+     * */
+    private final static String DATA_MODEL_SELECT_URL = "/dmo/data-service/data_model_select";
+
+    /**
+     * 关联文件上传
+     * */
+    private final static String LINK_FILE_UPLOAD_URL = "/dmo/file-service/link_file_upload";
+
+    /**
+     * 动态生成树
+     * */
+    private final static String DYNAMIC_TREE_URL = "/dmo/data-service/dynamic_tree";
+
+    /**
+     * 关联文件删除
+     * */
+    private final static String LINK_FILE_DELETE_URL = "/dmo/file-service/link_file_delete";
+
+    /**文件全文检索*/
+    private static final String FILE_FULLTEXT_SEARCH_URL = "/dmo/file-service/file_fulltext_search";
+
+
+    /**
      * 数据中台API的实现类
      *
      * @param dmoEndpoint 数据中台连接信息，不可为空
@@ -206,6 +285,10 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Object> advanceDynamicSql(String datasourceName, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return advanceDynamicSql(ADVANCE_DYNAMIC_SQL_URL, datasourceName, sql, authenticationType);
+    }
+
     public ResponseEntity<Object> advanceDynamicSql(String url, String datasourceName, String sql, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         CheckUtils.checkNone(sql, "sql不能为空");
@@ -244,6 +327,10 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<List<Dic>> searchDic(String businessName, String dicType, String dicName) throws DmoApiSdkException {
+        return searchDic(DIC_SEARCH_URL, businessName, dicType, dicName);
+    }
+
     public ResponseEntity<List<Dic>> searchDic(String url, String businessName, String dicType, String dicName) throws DmoApiSdkException {
         // TODO 暂时字典查询没有验证
         DataServiceAuthenticationType authenticationType = DataServiceAuthenticationType.NONE;
@@ -287,6 +374,10 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<List<Param>> searchParam(String businessName, String paramKey, String paramName) throws DmoApiSdkException {
+        return searchParam(PARAM_SEARCH_URL, businessName, paramKey, paramName);
+    }
+
     public ResponseEntity<List<Param>> searchParam(String url, String businessName, String paramKey, String paramName) throws DmoApiSdkException {
         // TODO 暂时参数查询没有验证
         DataServiceAuthenticationType authenticationType = DataServiceAuthenticationType.NONE;
@@ -330,6 +421,10 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<SearchResult> advanceSearch(String datasourceName, String tableName, DmoRequest request, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return advanceSearch(ADVANCE_SEARCH_URL, datasourceName, tableName, request, authenticationType);
+    }
+
     public ResponseEntity<SearchResult> advanceSearch(String url, String datasourceName, String tableName, DmoRequest request, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         if (request == null) {
@@ -351,8 +446,12 @@ public class DmoApiImpl implements IDmoApi {
         });
     }
 
-
     @Override
+    public ResponseEntity<Void> advanceAdd(String datasourceName, String tableName,
+                                           List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return advanceAdd(ADVANCE_ADD_URL, datasourceName, tableName, items, authenticationType);
+    }
+
     public ResponseEntity<Void> advanceAdd(String url, String datasourceName, String tableName,
                                            List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
@@ -387,6 +486,11 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Void> advanceEdit(String datasourceName, String tableName, List<UpdateEntity> updateEntities, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return advanceEdit(ADVANCE_EDIT_URL, datasourceName, tableName, updateEntities, authenticationType);
+    }
+
+
     public ResponseEntity<Void> advanceEdit(String url, String datasourceName, String tableName, List<UpdateEntity> updateEntities, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         String jsonBody = JsonUtils.toJson(updateEntities);
@@ -402,6 +506,12 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Void> advanceDelete(String datasourceName, String tableName,
+                                              List<Map<String, Object>> deleteEntities,
+                                              DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return advanceDelete(ADVANCE_DELETE_URL, datasourceName, tableName, deleteEntities, authenticationType);
+    }
+
     public ResponseEntity<Void> advanceDelete(String url, String datasourceName, String tableName,
                                               List<Map<String, Object>> deleteEntities,
                                               DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
@@ -419,6 +529,11 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Map<String, Object>> dataViewSearch(GeneralQueryRequest request, String fileName, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return dataViewSearch(DATA_VIEW_SEARCH_URL, request, fileName, authenticationType);
+    }
+
+
     public ResponseEntity<Map<String, Object>> dataViewSearch(String url, GeneralQueryRequest request, String fileName, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         String jsonBody = JsonUtils.toJson(request);
@@ -435,6 +550,11 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<List<TableRelationVO>> tableRelationSelect(String datasourceName, String tableName,
+                                                                     DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return tableRelationSelect(TABLE_RELATION_SELECT_URL, datasourceName, tableName, authenticationType);
+    }
+
     public ResponseEntity<List<TableRelationVO>> tableRelationSelect(String url, String datasourceName, String tableName,
                                                                      DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
@@ -452,6 +572,10 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<SearchResult> linkDataSelect(LinkDataRequest linkDataRequest, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return linkDataSelect(LINK_DATA_SEARCH_URL, linkDataRequest, authenticationType);
+    }
+
     public ResponseEntity<SearchResult> linkDataSelect(String url, LinkDataRequest linkDataRequest, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         String jsonBody = JsonUtils.toJson(linkDataRequest);
@@ -467,6 +591,12 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public void advanceFileDownload(String datasourceName, String filePath,
+                                    OutputStream os, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        advanceFileDownload(ADVANCE_DOWNLOAD_FILE_URL, datasourceName, filePath, os, authenticationType);
+    }
+
+
     public void advanceFileDownload(String url, String datasourceName, String filePath,
                                     OutputStream os, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         if (datasourceName == null) {
@@ -635,6 +765,10 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Map<String, Object>> dataModelSelect(String datasourceName, String tableName, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return dataModelSelect(DATA_MODEL_SELECT_URL, datasourceName, tableName, authenticationType);
+    }
+
     public ResponseEntity<Map<String, Object>> dataModelSelect(String url, String datasourceName, String tableName, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
 
@@ -652,6 +786,11 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Void> linkFileUpload(String datasourceName, String tableName, String parentPath, String refValues, List<OkHttpCustomClient.UploadInfo> uploadInfos, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return linkFileUpload(LINK_FILE_UPLOAD_URL, datasourceName,
+                tableName, parentPath, refValues, uploadInfos, authenticationType);
+    }
+
     public ResponseEntity<Void> linkFileUpload(String url, String datasourceName, String tableName, String parentPath, String refValues, List<OkHttpCustomClient.UploadInfo> uploadInfos, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         if (parentPath == null) {
@@ -672,6 +811,14 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public <T> ResponseEntity<List<TreeNode<T>>> dynamicTree(String datasourceName, String tableName,
+                                                             String labelKey, String valueKey, String pvalueKey,
+                                                             String sortKey, Class<T> tClass, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return dynamicTree(DYNAMIC_TREE_URL, datasourceName, tableName, labelKey, valueKey,
+                pvalueKey, sortKey, tClass, authenticationType);
+    }
+
+
     public <T> ResponseEntity<List<TreeNode<T>>> dynamicTree(String url, String datasourceName, String tableName,
                                                              String labelKey, String valueKey, String pvalueKey,
                                                              String sortKey, Class<T> tClass, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
@@ -692,6 +839,12 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
+    public ResponseEntity<Void> linkFileDelete(String datasourceName, String tableName, String filePath,
+                                               String refValues, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return linkFileDelete(LINK_FILE_DELETE_URL, datasourceName, tableName, filePath,
+                refValues, authenticationType);
+    }
+
     public ResponseEntity<Void> linkFileDelete(String url, String datasourceName, String tableName, String filePath,
                                                String refValues, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
@@ -707,6 +860,12 @@ public class DmoApiImpl implements IDmoApi {
             throw new DmoApiSdkException(e);
         }
         return JsonUtils.fromJson(res, ResponseEntity.class);
+    }
+
+    @Override
+    public TableResponse<FileFulltextVO> fileFulltextSearch(String datasourceName, FileFulltextSearchType searchType, String query, Integer pageNumber, Integer pageSize, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        return fileFulltextSearch(FILE_FULLTEXT_SEARCH_URL, datasourceName, searchType,
+                query, pageNumber, pageSize, authenticationType);
     }
 
     @Override
