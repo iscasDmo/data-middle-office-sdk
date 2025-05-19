@@ -466,4 +466,21 @@ public interface IDmoApi {
     ResponseEntity<Void> linkFileDelete(String url, String datasourceName, String tableName, String filePath,
                                         String refValues, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
+
+    /**
+     * 文件全文检索
+     *
+     * @param url                接口URL，从数据中台获取
+     * @param datasourceName        数据源名
+     * @param searchType        查询方式
+     * @param query        查询条件
+     * @param pageNumber        页码 为空的话默认为1
+     * @param pageSize 每页条数 为空的话默认为10
+     * @return 响应结果
+     * @date 2025/03/25
+     * @since jdk1.8
+     */
+    TableResponse<FileFulltextVO> fileFulltextSearch(String url, String datasourceName, FileFulltextSearchType searchType,
+                                            String query, Integer pageNumber, Integer pageSize, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+
 }

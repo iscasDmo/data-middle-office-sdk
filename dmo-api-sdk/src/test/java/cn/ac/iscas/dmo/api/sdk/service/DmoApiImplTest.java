@@ -173,12 +173,12 @@ public class DmoApiImplTest {
      * */
     private final static String TEST_LINK_FILE_DELETE_URL = "/dmo/file-service/link_file_delete";
 
+    /**文件全文检索*/
+    private static final String TEST_FILE_FULLTEXT_SEARCH_URL = "/dmo/file-service/file_fulltext_search";
     /**
      * 普通认证的TOKEN
      */
-    private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzQxODY0MDQ0LCJleHAiOjE4M" +
-            "DYwNTkyNDcsImlhdCI6MTc0MTg2NDA0NCwicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9.XY" +
-            "HfYBudmZLNI2M3_plREdpauzxidw-KtZ871KtYJrk";
+    private final static String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNzM5MTUyMDYzLCJleHAiOjIyNzcxNjQ4NjYsImlhdCI6MTczOTE1MjA2MywicGVybWFuZW50bHkiOiJ0cnVlIiwidXNlcm5hbWUiOiJhZG1pbiJ9.smnMVgqoSE4mGviCHv6QspKlpVtsPjgLjn4XMPGjnfk";
 
     /**
      * 签名模式的appId
@@ -205,6 +205,7 @@ public class DmoApiImplTest {
             "IPBdSDsCf29ZpM9T6XB0TWcur2yXj0ENXnxOA+/ZxhQJ7ypjFwF49NoomXdHnUBD6LZ/7i/S7aG3Mj0UcoRs0314rEMp/1WZHNlkXnjH" +
             "z2GOgzeq4sEkYVW7wgFK/lrU8LcrywXZoaHv67Z8ne//nazgz5Tvw0z/Kx66ZQzVue+utHbLj2c=";
 
+
     IDmoApi dmoApi1;
     IDmoApi dmoApi2;
     IDmoApi dmoApi3;
@@ -212,14 +213,14 @@ public class DmoApiImplTest {
     @Before
     public void setUp() {
         // 无需鉴权的模式
-        dmoApi1 = new DmoApiImpl("http://192.168.50.49:6282");
+        dmoApi1 = new DmoApiImpl("http://192.168.50.49:3282");
 
         // 普通鉴权模式(无需鉴权模式的API也可以调用)
-        dmoApi2 = new DmoApiImpl("http://192.168.50.49:6282", new OkHttpProps(),
+        dmoApi2 = new DmoApiImpl("http://192.168.50.49:3282", new OkHttpProps(),
                 TOKEN, null, null);
 
         // 签名鉴权模式 + 普通鉴权模式 (无需鉴权模式的API、普通鉴权的API、签名鉴权的API都可以调用)
-        dmoApi3 = new DmoApiImpl("http://192.168.50.49:6282", new OkHttpProps(),
+        dmoApi3 = new DmoApiImpl("http://192.168.50.49:3282", new OkHttpProps(),
                 TOKEN, APP_ID, APP_SECRET);
     }
 
@@ -513,9 +514,8 @@ public class DmoApiImplTest {
      */
     @Test
     public void testAdvanceDynamicSql() throws DmoApiSdkException {
-        List<Map<String, Object>> addItems = createAddItems();
         ResponseEntity<Object> res = dmoApi2.advanceDynamicSql(TEST_ADVANCE_DYNAMIC_SQL_URL,
-                "student", "SELECT * FROM COURSE", DataServiceAuthenticationType.SIMPLE);
+                "地理信息库", "select grid_number, lon_center, lat_center, lon_top_right, lat_top_right, lon_top_left, lat_top_left, lon_bottom_right, lat_bottom_right, lon_bottom_left, lat_bottom_left from \tpublic.grid_2m_8035 g where g.lon_top_right > 79.08551411883477 and g.lat_top_right > 32.50041814133521 \tand g.lon_bottom_left < 79.09616588116523 \tand g.lat_bottom_left < 32.509461858664785   order by grid_number desc  limit 10 offset 1", DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
@@ -731,6 +731,18 @@ public class DmoApiImplTest {
                 "dict_data", "/data_ref_files/101-mysql-dmo/dict_data/1/rocketmq_grpc.docx", "1", DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
+    }
+    
+    /**
+     * 文件全文检索
+     * */
+    @Test
+    public void testFileFulltextSearch() throws DmoApiSdkException {
+        TableResponse<FileFulltextVO> res = dmoApi2.fileFulltextSearch(TEST_FILE_FULLTEXT_SEARCH_URL,
+                null,
+                FileFulltextSearchType.all,
+                "的", 1, 10, DataServiceAuthenticationType.SIMPLE);
+        System.out.println(res);
     }
 
     private static DmoRequest createSearchRequest() {

@@ -709,6 +709,27 @@ public class DmoApiImpl implements IDmoApi {
         return JsonUtils.fromJson(res, ResponseEntity.class);
     }
 
+    @Override
+    public TableResponse<FileFulltextVO> fileFulltextSearch(String url, String datasourceName, FileFulltextSearchType searchType, String query, Integer pageNumber, Integer pageSize, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+        CheckUtils.checkAuthorizationType(authenticationType, this);
+
+        pageNumber = pageNumber == null ? 1 : pageNumber;
+        pageSize = pageSize == null ? 10 : pageSize;
+
+        AdvanceParam advanceParam = getAdvanceParam(Arrays.asList("datasourceName", "query", "pageNumber", "pageSize"),
+                Arrays.asList(datasourceName, query, String.valueOf(pageNumber), String.valueOf(pageSize)));
+
+        Map<String, String> header = createHeader(authenticationType, "GET", url + advanceParam.paramString, "");
+        String res;
+        try {
+            res = httpClient.doGet(dmoEndpoint + url + advanceParam.oriParamString, header);
+        } catch (IOException e) {
+            throw new DmoApiSdkException(e);
+        }
+        return JsonUtils.fromJson(res, new TypeReference<TableResponse<FileFulltextVO>>() {
+        });
+    }
+
     private Map<String, String> createHeader(DataServiceAuthenticationType type, String httpMethod,
                                              String url, String body) throws DmoApiSdkException {
         Map<String, String> headers = new HashMap<>();
@@ -765,7 +786,7 @@ public class DmoApiImpl implements IDmoApi {
         return new AdvanceParam(paramString, oriParamString);
     }
 
-    private  AdvanceParam getAdvanceParam(List<String> keys, List<String> values) throws DmoApiSdkException {
+    private AdvanceParam getAdvanceParam(List<String> keys, List<String> values) throws DmoApiSdkException {
         List<String> params = new ArrayList<>();
         List<String> oriParams = new ArrayList<>();
         try {
@@ -773,9 +794,11 @@ public class DmoApiImpl implements IDmoApi {
                 String key = keys.get(i);
                 String value = values.get(i);
                 String encodeValue = value;
-                if (!isURLEncoded(value)) {
+                if (!isURLEncoded(value) && Objects.nonNull(value)) {
                     encodeValue = URLEncoder.encode(value, "UTF-8").replace("+", "%20");
                 }
+                encodeValue = encodeValue == null ? "" : encodeValue;
+                value = value == null ? "" : value;
                 params.add(key + "=" + encodeValue);
                 oriParams.add(key + "=" + value);
             }
