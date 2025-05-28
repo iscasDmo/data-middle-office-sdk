@@ -195,7 +195,7 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
-    public ResponseEntity<Void> add(String url, List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
+    public ResponseEntity<List<Map<String, Object>>> add(String url, List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
         CheckUtils.checkNone(items, "items不能为空");
         String jsonBody = JsonUtils.toJson(items);
@@ -206,7 +206,7 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<Void>>() {
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Map<String, Object>>>>() {
         });
     }
 
@@ -447,12 +447,12 @@ public class DmoApiImpl implements IDmoApi {
     }
 
     @Override
-    public ResponseEntity<Void> advanceAdd(String datasourceName, String tableName,
+    public ResponseEntity<List<Map<String, Object>>> advanceAdd(String datasourceName, String tableName,
                                            List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         return advanceAdd(ADVANCE_ADD_URL, datasourceName, tableName, items, authenticationType);
     }
 
-    public ResponseEntity<Void> advanceAdd(String url, String datasourceName, String tableName,
+    public ResponseEntity<List<Map<String, Object>>> advanceAdd(String url, String datasourceName, String tableName,
                                            List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException {
         CheckUtils.checkAuthorizationType(authenticationType, this);
 
@@ -467,7 +467,7 @@ public class DmoApiImpl implements IDmoApi {
         } catch (IOException e) {
             throw new DmoApiSdkException(e);
         }
-        return JsonUtils.fromJson(res, ResponseEntity.class);
+        return JsonUtils.fromJson(res, new TypeReference<ResponseEntity<List<Map<String, Object>>>>(){});
     }
 
     @Override

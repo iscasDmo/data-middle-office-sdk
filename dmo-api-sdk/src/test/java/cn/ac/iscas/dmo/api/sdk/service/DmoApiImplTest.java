@@ -269,7 +269,7 @@ public class DmoApiImplTest {
     public void testAdd1() throws DmoApiSdkException {
         List<Map<String, Object>> items = createAddItems();
 
-        ResponseEntity<Void> res = dmoApi1.add(TEST_ADD_URL, items, DataServiceAuthenticationType.NONE);
+        ResponseEntity<List<Map<String, Object>>> res = dmoApi1.add(TEST_ADD_URL, items, DataServiceAuthenticationType.NONE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
@@ -281,7 +281,7 @@ public class DmoApiImplTest {
     public void testAdd2() throws DmoApiSdkException {
         List<Map<String, Object>> items = createAddItems();
 
-        ResponseEntity<Void> res = dmoApi2.add(TEST_ADD_URL, items, DataServiceAuthenticationType.SIMPLE);
+        ResponseEntity<List<Map<String, Object>>> res = dmoApi2.add(TEST_ADD_URL, items, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
@@ -293,7 +293,7 @@ public class DmoApiImplTest {
     public void testAdd3() throws DmoApiSdkException {
         List<Map<String, Object>> items = createAddItems();
 
-        ResponseEntity<Void> res = dmoApi3.add(TEST_ADD_URL, items, DataServiceAuthenticationType.SIGN);
+        ResponseEntity<List<Map<String, Object>>> res = dmoApi3.add(TEST_ADD_URL, items, DataServiceAuthenticationType.SIGN);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
@@ -514,7 +514,7 @@ public class DmoApiImplTest {
     @Test
     public void testAdvanceAdd2() throws DmoApiSdkException {
         List<Map<String, Object>> addItems = createAddItems();
-        ResponseEntity<Void> res = dmoApi2.advanceAdd(TEST_ADVANCE_ADD_URL,
+        ResponseEntity<List<Map<String, Object>>> res = dmoApi2.advanceAdd(TEST_ADVANCE_ADD_URL,
                 "mysql-dmo", "ods_test03", addItems, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
@@ -526,8 +526,8 @@ public class DmoApiImplTest {
     @Test
     public void testAdvanceAdd3() throws DmoApiSdkException {
         List<Map<String, Object>> addItems = createAddItems();
-        ResponseEntity<Void> res = dmoApi2.advanceAdd(
-                "mysql-dmo", "ods_test03", addItems, DataServiceAuthenticationType.SIMPLE);
+        ResponseEntity<List<Map<String, Object>>> res = dmoApi2.advanceAdd(
+                "student", "ods_dweg", addItems, DataServiceAuthenticationType.SIMPLE);
         Assert.assertNotNull(res);
         Assert.assertEquals(res.getStatus().longValue(), 200L);
     }
@@ -976,9 +976,9 @@ public class DmoApiImplTest {
 
     private static List<Map<String, Object>> createAddItems() {
         Map<String, Object> item1 = new HashMap<>();
-        item1.put("name", "李四");
+        item1.put("name", "011");
         Map<String, Object> item2 = new HashMap<>();
-        item2.put("name", "赵六");
+        item2.put("name", "012");
         List<Map<String, Object>> items = new ArrayList<>();
         items.add(item1);
         items.add(item2);

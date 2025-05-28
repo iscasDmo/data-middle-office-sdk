@@ -4,20 +4,20 @@ buildscript {
             url "${nexusUrl}"
             allowInsecureProtocol = true
         }
-        maven {
-            url "${aliyunUrl}"
-            allowInsecureProtocol = true
-        }
-        maven {
-            url "${aliyunGradlePluginUrl}"
-            allowInsecureProtocol = true
-        }
-        maven {
-            url "${gradlePluginUrl}"
-            allowInsecureProtocol = true
-        }
-        gradlePluginPortal()
-        mavenCentral()
+//        maven {
+//            url "${aliyunUrl}"
+//            allowInsecureProtocol = true
+//        }
+//        maven {
+//            url "${aliyunGradlePluginUrl}"
+//            allowInsecureProtocol = true
+//        }
+//        maven {
+//            url "${gradlePluginUrl}"
+//            allowInsecureProtocol = true
+//        }
+//        gradlePluginPortal()
+//        mavenCentral()
 
     }
     dependencies {
@@ -50,12 +50,12 @@ subprojects {
             url "${nexusUrl}"
             allowInsecureProtocol = true
         }
-        maven {
-            url "${aliyunUrl}"
-            allowInsecureProtocol = true
-        }
-
-        mavenCentral()
+//        maven {
+//            url "${aliyunUrl}"
+//            allowInsecureProtocol = true
+//        }
+//
+//        mavenCentral()
     }
 
     dependencies {

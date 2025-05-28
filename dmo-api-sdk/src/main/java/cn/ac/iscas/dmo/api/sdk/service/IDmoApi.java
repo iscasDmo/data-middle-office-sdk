@@ -51,7 +51,7 @@ public interface IDmoApi {
      * @date 2024/10/29
      * @since jdk1.8
      */
-    ResponseEntity<Void> add(String url, List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
+    ResponseEntity<List<Map<String, Object>>> add(String url, List<Map<String, Object>> items, DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
     /**
      * 新增数据(tdengine类型数据库专用)
@@ -239,7 +239,7 @@ public interface IDmoApi {
      * @since jdk1.8
      */
     @Deprecated
-    ResponseEntity<Void> advanceAdd(String url, String datasourceName, String tableName, List<Map<String, Object>> items,
+    ResponseEntity<List<Map<String, Object>>> advanceAdd(String url, String datasourceName, String tableName, List<Map<String, Object>> items,
                                     DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
     /**
@@ -253,7 +253,7 @@ public interface IDmoApi {
      * @date 2024/11/05
      * @since jdk1.8
      */
-    ResponseEntity<Void> advanceAdd(String datasourceName, String tableName, List<Map<String, Object>> items,
+    ResponseEntity<List<Map<String, Object>>> advanceAdd(String datasourceName, String tableName, List<Map<String, Object>> items,
                                     DataServiceAuthenticationType authenticationType) throws DmoApiSdkException;
 
 
